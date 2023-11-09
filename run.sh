@@ -62,8 +62,16 @@ demo() {
 }
 
 gen-png() {
-  eps -t dot -o _tmp/manual.dot examples/manual.epsilon 
-  dot -Tpng -o _tmp/manual.png _tmp/manual.dot
+  local name=${1:-manual}
+  eps -t dot -o _tmp/$name.dot examples/$name.epsilon 
+  dot -Tpng -o _tmp/$name.png _tmp/$name.dot
+}
+
+gen-all-png() {
+  set -x
+  gen-png manual
+  gen-png a
+  gen-png string
 }
 
 count() {

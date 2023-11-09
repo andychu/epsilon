@@ -1,0 +1,6 @@
+[string]
+
+dq = "([^\"]|\\.)"
+
+# These are like 2 parallel state machines
+# sq = '([^\']|\\.)'
