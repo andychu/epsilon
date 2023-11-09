@@ -129,13 +129,25 @@ cli() {
 #
 
 re2c-gen() {
-  local name=${1:-string}
+  local name=$1
+  shift
+  # Rest are flags
 
   set -x
-  re2c --emit-dot -o _tmp/$name-re2c.dot examples/$name.re2c.h
+  re2c "$@" --emit-dot -o _tmp/$name-re2c.dot examples/$name.re2c.h
   dot -Tpng -o _tmp/$name-re2c.png _tmp/$name-re2c.dot
 
   echo 'done'
+}
+
+re2c-string() {
+  re2c-gen string
+}
+
+re2c-utf8() {
+  # With --utf8 flag, we get the bigger DFA with UTF-8 support!
+
+  re2c-gen unicode --utf8
 }
 
 "$@"
