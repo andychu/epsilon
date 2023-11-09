@@ -2,3 +2,10 @@
 [a]
 
 identifier = a+
+
+# Note: a* is broken!  WTF.  This code doesn't have enough tests.
+
+# a? is also broken?  OK I want to fix these bugs
+#identifier = a?
+
+#identifier = abc

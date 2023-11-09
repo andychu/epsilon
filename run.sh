@@ -118,11 +118,30 @@ test-unicode() {
 }
 
 cli() {
-  #cd epsilon
-  #python3 cli.py --help
-
   # Geez this is the way to run
   python3 -m epsilon.cli "$@"
+}
+
+tool() {
+  python3 -m epsilon.tool "$@"
+}
+
+test-tool() {
+  set -x
+  tool 'a+' a
+  tool 'a+' b
+
+  tool 'a' a
+
+  # Bad syntax
+  tool ')' a
+  return
+  tool '+' a
+}
+
+test-with-nfa-suite() {
+  ../../oilshell/rsc-regexp/test $0 tool
+  #bash -x ../../oilshell/rsc-regexp/test $0 tool
 }
 
 #

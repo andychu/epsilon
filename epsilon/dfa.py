@@ -97,6 +97,8 @@ def scan(automaton, iterable,
         if atom is not None:
             symbol = tosymbol(atom)
             transitions = automaton.transitions[state]
+
+            # This is similar to util.IntegerSet.has(), but doesn't call it?
             i = bisect.bisect(transitions, (symbol,))
             if i < len(transitions) and symbol == transitions[i][0]:
                 state = transitions[i][2]
