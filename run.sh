@@ -148,6 +148,7 @@ re2c-utf8() {
   # With --utf8 flag, we get the bigger DFA with UTF-8 support!
 
   re2c-gen unicode --utf8
+  re2c-gen utf8-one --utf8
 }
 
 "$@"
