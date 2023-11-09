@@ -1,0 +1,28 @@
+
+[utf8]
+
+# Simulate this
+#
+# https://swtch.com/~rsc/regexp/regexp3.html
+#
+# [00-7F]                // code points 0000-007F
+# [C2-DF][80-BF]         // code points 0080-07FF
+# [E0][A0-BF][80-BF]     // code points 0800-0FFF
+# [E1-EF][80-BF][80-BF]  // code points 1000-FFFF
+
+# Test if . means Unicode, and if [^z] includes unicode
+utf8 = one | two | three #| four
+
+# Wow, just one and two creates a complicated DFA.
+#
+# I thought regex derivatives were supposed to create minimal DFAs?
+#
+# Much more compliated than what's in the blog post.
+# TODO: verify that RE2 can actually create that DFA?
+
+one = [\x00-\x7f] 
+two = [\xc2-\xdf][\x80-\xbf] 
+three = \xe0 [\xa0-\xbf][\x80-\xbf]
+
+# There's a typo here?  Missing first byte.
+four = [\xe1-\xef][\x80-\xbf][\x80-\xbf] 

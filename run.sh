@@ -72,6 +72,7 @@ gen-all-png() {
   gen-png manual
   gen-png a
   gen-png string
+  gen-png utf8
 }
 
 count() {
