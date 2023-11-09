@@ -43,7 +43,8 @@ class TestIntegerSet(unittest.TestCase):
         for i in range(self.ITERATIONS):
             a = set(random.sample(range(self.RANGE), self.SAMPLES))
             x = util.IntegerSet(a)
-            y = util.IntegerSet(random.sample(a, self.SAMPLES - 1))
+            b = random.sample(sorted(a), self.SAMPLES - 1)
+            y = util.IntegerSet(b)
             self.assertTrue(x.issubset(x))
             self.assertTrue(y.issubset(x))
             self.assertFalse(x.issubset(y))
@@ -53,7 +54,8 @@ class TestIntegerSet(unittest.TestCase):
         for i in range(self.ITERATIONS):
             a = set(random.sample(range(self.RANGE), self.SAMPLES))
             x = util.IntegerSet(a)
-            y = util.IntegerSet(random.sample(a, self.SAMPLES - 1))
+            b = random.sample(sorted(a), self.SAMPLES - 1)
+            y = util.IntegerSet(b)
             self.assertTrue(x.issuperset(x))
             self.assertTrue(x.issuperset(y))
             self.assertFalse(y.issuperset(x))
