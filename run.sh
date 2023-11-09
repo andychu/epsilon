@@ -17,19 +17,19 @@ make-venv() {
 
 install() {
   . _tmp/venv/bin/activate
-  pip3 install mypy yapf
+  pip3 install mypy yapf tox
 }
 
 check() {
   . _tmp/venv/bin/activate
 
-  mypy py/nfa.py
+  #mypy py/nfa.py
 }
 
 format() {
   . _tmp/venv/bin/activate
 
-  yapf -i py/nfa.py
+  #yapf -i py/nfa.py
 }
 
 
@@ -43,10 +43,24 @@ build() {
 }
 
 demo() {
+  mkdir -p _tmp
+
+  local out=_tmp/manual.py
   # Highly annoying
-  ~/.local/bin/epsilon -o examples/manual.py examples/manual.epsilon
+  ~/.local/bin/epsilon -o $out examples/manual.epsilon
   echo
-  cat examples/manual.py
+
+  chmod +x $out
+  cat $out
+
+  echo
+  cat README.md | python3 $out
+}
+
+orig-tests() {
+  . _tmp/venv/bin/activate
+
+  python3 -m tox
 }
 
 "$@"

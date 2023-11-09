@@ -1,2 +1,9 @@
 __pycache__
 .tox
+
+# Andy patch
+.*.swp
+_tmp
+build/
+dist/
+epsilon.egg-info/
