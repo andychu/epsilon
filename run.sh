@@ -42,12 +42,16 @@ build() {
   python3 setup.py install --user
 }
 
+eps() {
+  # Highly annoying that it's here
+  ~/.local/bin/epsilon "$@"
+}
+
 demo() {
   mkdir -p _tmp
 
   local out=_tmp/manual.py
-  # Highly annoying
-  ~/.local/bin/epsilon -o $out examples/manual.epsilon
+  eps -o $out examples/manual.epsilon
   echo
 
   chmod +x $out
@@ -55,6 +59,16 @@ demo() {
 
   echo
   cat README.md | python3 $out
+}
+
+gen-png() {
+  eps -t dot -o _tmp/manual.dot examples/manual.epsilon 
+  dot -Tpng -o _tmp/manual.png _tmp/manual.dot
+}
+
+count() {
+  # exclude unicode DB
+  ls epsilon/*.py | grep -v ucd.py | xargs wc -l
 }
 
 orig-tests() {
