@@ -85,4 +85,18 @@ orig-tests() {
   python3 -m tox
 }
 
+#
+# Compare with re2c
+#
+
+re2c-gen() {
+  local name=${1:-string}
+
+  set -x
+  re2c --emit-dot -o _tmp/$name-re2c.dot examples/$name.re2c.h
+  dot -Tpng -o _tmp/$name-re2c.png _tmp/$name-re2c.dot
+
+  echo 'done'
+}
+
 "$@"
