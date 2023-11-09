@@ -1,0 +1,5 @@
+
+[unicode]
+
+# Test if . means Unicode, and if [^z] includes unicode
+identifier = a.b[^c]d

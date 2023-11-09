@@ -95,6 +95,27 @@ test-string() {
   echo -n '"hi\n there \"' | execute
 }
 
+test-unicode() {
+  echo -n 'aZbZd' | execute unicode
+
+  # This works, it matches a single char
+  local mu=$'\u03bc'
+  local s="a${mu}b${mu}d" 
+  echo s=$s
+  echo -n "$s" | execute unicode
+
+  # This results in a Python error, not a epsilon error
+  local bad=$'\xFF'
+  local s="a${bad}b${bad}d" 
+  echo -n "$s" | execute unicode
+
+  # Hm this means that Epsilon is using the OPPOSITE strategy of RE2 / re2c.
+  #
+  # It does not compile unicode into the DFA, and operate on BYTES.
+  #
+  # Rather it uses code points only, with the big IntegerSet abstraction.  Hm.
+}
+
 cli() {
   #cd epsilon
   #python3 cli.py --help
