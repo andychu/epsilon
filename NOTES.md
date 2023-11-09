@@ -26,9 +26,22 @@ cli.py has this parser:
 
 - Make a command line interface that's compatible with rsc-regexp
   - Then all the same tests to see if they work
+  - eliminate the ConfigParser stuff?
+    - well it does a similar thing as re2c
+
   - Is the syntax compatible?
     - well it uses ConfigParser, so NO
   - So I want an alternative front end -- borrow re2post, and make the infix
     nodes instead
     - or possibly just compile postfix to regex.py node types
 
+- Do the performance test for a?a?a?aaaa
+  - make sure it's linear time
+
+- Understand how it does unicode
+  - is it iterating by byte, or by char?
+
+- Maybe add some type anotations?
+
+
+- <https://archive.fosdem.org/2018/schedule/event/python_regex_derivatives/attachments/slides/2363/export/events/attachments/python_regex_derivatives/slides/2363/fosdem2018.pdf>

@@ -85,6 +85,24 @@ orig-tests() {
   python3 -m tox
 }
 
+execute() {
+  local name=${1:-string}
+  cli -t execute examples/$name.epsilon
+}
+
+test-string() {
+  echo -n '"hi\n there \\ "' | execute
+  echo -n '"hi\n there \"' | execute
+}
+
+cli() {
+  #cd epsilon
+  #python3 cli.py --help
+
+  # Geez this is the way to run
+  python3 -m epsilon.cli "$@"
+}
+
 #
 # Compare with re2c
 #

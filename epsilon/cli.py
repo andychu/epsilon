@@ -90,6 +90,15 @@ def _compile(paths, target):
         parser = parse.Parser()
         tokens = tuple(key for key in section if not key.startswith("_"))
         if tokens:
+            if 0:
+                for token in tokens:
+                    pat = section[token]
+                    parsed = parser.parse(pat.replace('\n', ''))
+
+                    print('T', token)
+                    print('PAT', pat)
+                    print('PARSED', parsed)
+
             vector = dfa.ExpressionVector(
                     (token, parser.parse(section[token].replace("\n", "")))
                     for token in tokens)
