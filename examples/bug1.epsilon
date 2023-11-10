@@ -1,0 +1,5 @@
+
+[a]
+
+# Note: a* is broken!  WTF.  This code doesn't have enough tests.
+identifier = a*

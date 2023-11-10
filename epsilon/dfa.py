@@ -115,6 +115,9 @@ def scan(automaton, iterable,
                 yield accept[0], pack(buffer[:length])
                 buffer, offset = buffer[length:], 0
                 state, accept, length = 0, False, 0
+
+                # ANDY FIX: Prevents infinite loop
+                break
             elif buffer:
                 raise NoMatchError(buffer)
             else:

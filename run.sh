@@ -70,7 +70,10 @@ gen-png() {
 gen-all-png() {
   set -x
   gen-png manual
+
   gen-png a
+  gen-png bug1
+
   gen-png string
   gen-png utf8
 }
@@ -140,8 +143,11 @@ test-tool() {
 }
 
 test-with-nfa-suite() {
-  ../../oilshell/rsc-regexp/test $0 tool
+  #../../oilshell/rsc-regexp/test $0 tool
   #bash -x ../../oilshell/rsc-regexp/test $0 tool
+
+  # from BurntSushi/rsc-regexp
+  ./nfa-suite.sh $0 tool
 }
 
 #
