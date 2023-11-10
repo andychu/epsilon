@@ -17,6 +17,7 @@
 import bisect
 import collections
 import functools
+import time
 from . import regex
 from . import util
 
@@ -51,6 +52,9 @@ def construct(expr):
     states = {expr: 0}
     transitions = [[]]
 
+    start_time = time.time()
+    i = 0
+
     stack = [expr]
     while stack:
         state = stack.pop()
@@ -66,7 +70,15 @@ def construct(expr):
             nextnumber = states[nextstate]
             for first, last in derivative_class:
                 transitions[number].append((first, last, nextnumber))
+
+                i += 1
+                if i % 5 == 0:
+                    #elapsed = time.time() - start_time
+                    #util.log('%d iterations in %.5f seconds', i, elapsed)
+                    pass
+
         transitions[number].sort()
+
 
     accepts = [state.nullable() for state in states]
     error = states[expr.NULL]
@@ -83,7 +95,6 @@ def scan(automaton, iterable,
     state, accept, length = 0, False, 0
     atoms = iterable
 
-    import time
     start_time = time.time()
 
     i = 0

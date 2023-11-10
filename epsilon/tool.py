@@ -1,5 +1,6 @@
 # Alternative to cli.py that matches our test interface
 
+import os
 import sys
 import time
 
@@ -65,6 +66,12 @@ def main(argv):
         print('NOPE')
 
     log('.%5f Matched', elapsed)
+
+    if 0:
+        pid = os.getpid()
+        log('PID %d sleep', pid)
+        os.system('cat /proc/%d/status' % pid)
+        time.sleep(10)
 
 
 if __name__ == '__main__':
