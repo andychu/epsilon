@@ -82,6 +82,11 @@ def scan(automaton, iterable,
     buffer, offset = [], 0
     state, accept, length = 0, False, 0
     atoms = iterable
+
+    import time
+    start_time = time.time()
+
+    i = 0
     while True:
         if automaton.accepts[state]:
             accept = automaton.accepts[state]
@@ -122,3 +127,8 @@ def scan(automaton, iterable,
                 raise NoMatchError(buffer)
             else:
                 break
+        i += 1
+        if i % 100 == 0:
+            #elapsed = time.time() - start_time
+            #util.log('%d iterations in %.5f seconds', 100, elapsed)
+            pass

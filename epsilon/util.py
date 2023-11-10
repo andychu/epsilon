@@ -17,6 +17,14 @@
 import bisect
 import functools
 import itertools
+import sys
+
+
+def log(msg, *args):
+    if args:
+        msg = msg % args
+    print(msg, file=sys.stderr)
+
 
 def product_intersections(*sets):
     """Return the intersections of the cartesian product of sequences of sets.
