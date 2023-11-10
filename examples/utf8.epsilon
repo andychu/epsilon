@@ -24,5 +24,6 @@ one = [\x00-\x7f]
 two = [\xc2-\xdf][\x80-\xbf] 
 three = \xe0 [\xa0-\xbf][\x80-\xbf]
 
-# There's a typo here?  Missing first byte.
+# Oh this is only 0x0000 to 0xFFFF, so it's 16 bit
+
 four = [\xe1-\xef][\x80-\xbf][\x80-\xbf] 

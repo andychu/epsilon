@@ -76,6 +76,7 @@ gen-all-png() {
 
   gen-png string
   gen-png utf8
+  gen-png utf8-factored
 }
 
 count() {

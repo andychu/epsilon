@@ -1,0 +1,22 @@
+[utf8]
+
+# Simulate this
+#
+# https://swtch.com/~rsc/regexp/regexp3.html
+#
+# [00-7F]                // code points 0000-007F
+# [C2-DF][80-BF]         // code points 0080-07FF
+# [E0][A0-BF][80-BF]     // code points 0800-0FFF
+# [E1-EF][80-BF][80-BF]  // code points 1000-FFFF
+
+# Test if . means Unicode, and if [^z] includes unicode
+
+       # one          two           three              four
+utf8 = [\x00-\x7f] | ([\xc2-\xdf] | \xe0 [\xa0-\xbf] | [\xe1-\xef][\x80-\xbf]) [\x80-\xbf]
+
+# two = [\xc2-\xdf][\x80-\xbf] 
+# three = \xe0 [\xa0-\xbf][\x80-\xbf]
+
+# Oh this is only 0x0000 to 0xFFFF, so it's 16 bit
+
+# four = [\xe1-\xef][\x80-\xbf][\x80-\xbf] 
