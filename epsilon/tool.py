@@ -22,7 +22,8 @@ def main(argv):
 
     try:
         expr = parser.parse(pat)
-    except parse.SyntaxError:
+    except parse.SyntaxError as e:
+        #print(e)
         print('bad regexp')  # the common protocol
         return 
 

@@ -130,7 +130,7 @@ tool() {
 }
 
 test-tool() {
-  set -x
+  #set -x
   tool 'a+' a
   tool 'a+' b
 
@@ -138,8 +138,18 @@ test-tool() {
 
   # Bad syntax
   tool ')' a
+
+  # BUG in Epsilon parser: Doesn't accept [^"\]
+  local fav='"([^\"]|\\.)*"'
+
+  tool "$fav" '"hi"'
+  tool "$fav" '"hi\n \\ "'
+  tool "$fav" '"hi\n \"'
+  tool "$fav" 'hi"'
+
   return
   tool '+' a
+
 }
 
 test-with-nfa-suite() {
