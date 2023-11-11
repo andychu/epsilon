@@ -21,6 +21,8 @@ import time
 from . import regex
 from . import util
 
+log = util.log
+
 Automaton = collections.namedtuple("Automaton",
         ["transitions", "accepts", "error"])
 
@@ -57,8 +59,14 @@ def construct(expr):
 
     stack = [expr]
     while stack:
+        # DFA states correspond to regular languages derived from the
+        # language we're compiling?
         state = stack.pop()
         number = states[state]
+
+        # a?a has 4 states.  Linear in the size of the pattern
+        log('number = %d', number)
+
         for derivative_class in state.derivative_classes():
             symbol = derivative_class[0][0]
             nextstate = state.derivative(symbol)

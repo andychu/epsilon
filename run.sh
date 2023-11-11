@@ -23,7 +23,7 @@ install() {
 check() {
   . _tmp/venv/bin/activate
 
-  #mypy py/nfa.py
+  mypy refactor/*.py
 }
 
 format() {
