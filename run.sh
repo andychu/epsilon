@@ -81,7 +81,7 @@ gen-all-png() {
 
 count() {
   # exclude unicode DB
-  ls epsilon/*.py | grep -v ucd.py | xargs wc -l
+  ls refactor/*.py | grep -v ucd.py | xargs wc -l
 }
 
 orig-tests() {

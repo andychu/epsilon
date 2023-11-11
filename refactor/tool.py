@@ -6,7 +6,6 @@ import time
 
 from . import dfa
 from . import parse
-from . import target_execute
 from . import util
 
 def log(msg, *args):
