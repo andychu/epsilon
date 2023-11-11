@@ -45,13 +45,53 @@ class ExpressionVector(tuple):
 
 
 def DerivClasses(state):
+    #log('state %s', state)
     if isinstance(state, ExpressionVector):
         return filter(
             None,
             functools.reduce(util.product_intersections,
-                             (expr.derivative_classes() for _, expr in state)))
+                             (DerivClasses(expr) for _, expr in state)))
+
+    elif isinstance(state, regex.Epsilon):
+        return {regex.codespace}
+
+    elif isinstance(state, regex.SymbolSet):
+        #raise AssertionError()
+        return {
+            state._codepoints,
+            regex.codespace.difference(state._codepoints)
+        }
+
+    elif isinstance(state, regex.KleeneClosure):
+        return DerivClasses(state._expr)
+
+    elif isinstance(state, regex.Complement):
+        return DerivClasses(state._expr)
+
+    elif isinstance(state, regex.Concatenation):
+        if state._left.nullable():
+            return filter(
+                None,
+                util.product_intersections(DerivClasses(state._left),
+                                           DerivClasses(state._right)))
+        else:
+            return DerivClasses(state._left)
+
+    elif isinstance(state, regex.LogicalOr):
+        return filter(
+            None,
+            util.product_intersections(DerivClasses(state._left),
+                                       DerivClasses(state._right)))
+
+    elif isinstance(state, regex.LogicalAnd):
+        return filter(
+            None,
+            util.product_intersections(DerivClasses(state._left),
+                                       DerivClasses(state._right)))
+
     else:
-        return state.derivative_classes()
+        raise AssertionError(state)
+        #return state.derivative_classes()
 
 
 def construct(expr):

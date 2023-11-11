@@ -76,9 +76,6 @@ class SymbolSet(Expression):
     def derivative(self, symbol):
         return self.EPSILON if self._codepoints.has(symbol) else self.NULL
 
-    def derivative_classes(self):
-        return {self._codepoints, codespace.difference(self._codepoints)}
-
 
 class Epsilon(Expression):
 
@@ -93,9 +90,6 @@ class Epsilon(Expression):
 
     def derivative(self, symbol):
         return self.NULL
-
-    def derivative_classes(self):
-        return {codespace}
 
 
 class KleeneClosure(Expression):
@@ -124,9 +118,6 @@ class KleeneClosure(Expression):
     def derivative(self, symbol):
         return Concatenation(self._expr.derivative(symbol), self)
 
-    def derivative_classes(self):
-        return self._expr.derivative_classes()
-
 
 class Complement(Expression):
 
@@ -153,9 +144,6 @@ class Complement(Expression):
 
     def derivative(self, symbol):
         return Complement(self._expr.derivative(symbol))
-
-    def derivative_classes(self):
-        return self._expr.derivative_classes()
 
 
 class Concatenation(Expression):
@@ -192,12 +180,6 @@ class Concatenation(Expression):
         return LogicalOr(
             Concatenation(self._left.derivative(symbol), self._right),
             Concatenation(self._left.nu(), self._right.derivative(symbol)))
-
-    def derivative_classes(self):
-        return self._left.derivative_classes() if not self._left.nullable()\
-                else filter(None, util.product_intersections(
-                    self._left.derivative_classes(),
-                    self._right.derivative_classes()))
 
 
 class LogicalOr(Expression):
@@ -246,12 +228,6 @@ class LogicalOr(Expression):
         return LogicalOr(self._left.derivative(symbol),
                          self._right.derivative(symbol))
 
-    def derivative_classes(self):
-        return filter(
-            None,
-            util.product_intersections(self._left.derivative_classes(),
-                                       self._right.derivative_classes()))
-
 
 class LogicalAnd(Expression):
 
@@ -295,12 +271,6 @@ class LogicalAnd(Expression):
     def derivative(self, symbol):
         return LogicalAnd(self._left.derivative(symbol),
                           self._right.derivative(symbol))
-
-    def derivative_classes(self):
-        return filter(
-            None,
-            util.product_intersections(self._left.derivative_classes(),
-                                       self._right.derivative_classes()))
 
 
 Expression.EPSILON = Epsilon()
