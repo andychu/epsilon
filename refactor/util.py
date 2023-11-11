@@ -26,15 +26,6 @@ def log(msg, *args):
     print(msg, file=sys.stderr)
 
 
-def product_intersections(*sets):
-    """Return the intersections of the cartesian product of sequences of sets.
-
-    :param sets: Iterables sof sets.
-    :return: A set of intersections.
-    """
-    return set(x[0].intersection(*x[1:]) for x in itertools.product(*sets))
-
-
 class IntegerSet(tuple):
     """An immutable set of integers, represented as sorted tuple of disjoint,
     non-contiguous ranges.
