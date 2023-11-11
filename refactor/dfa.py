@@ -32,9 +32,8 @@ class ExpressionVector(tuple):
     def __new__(cls, iterable):
         return super().__new__(cls, iterable)
 
-    @property
-    def NULL(self):
-        return self.__class__((name, expr.NULL) for name, expr in self)
+    def NullValue(self):
+        return self.__class__((name, regex.NULL) for name, expr in self)
 
     def nullable(self):
         return [name for name, expr in self if expr.nullable()]
@@ -144,7 +143,7 @@ def construct(expr):
         transitions[number].sort()
 
     accepts = [state.nullable() for state in states]
-    error = states[expr.NULL]
+    error = states[expr.NullValue()]
     return Automaton(transitions, accepts, error)
 
 

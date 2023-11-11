@@ -30,10 +30,6 @@ codespace = util.IntegerSet(cs)
 
 @functools.total_ordering
 class Expression:
-    # Set later
-    EPSILON: Optional['Epsilon'] = None
-    SIGMA: Optional['SymbolSet'] = None
-    NULL: Optional['SymbolSet'] = None
 
     def __eq__(self, expr):
         return self._orderby() == expr._orderby()
@@ -47,10 +43,13 @@ class Expression:
     def __repr__(self):
         return "<{}>".format(str(self))
 
+    def NullValue(self):
+        return NULL
+
     def nullable(self):
         nu = self.nu()
-        assert nu == self.EPSILON or nu == self.NULL
-        return nu == self.EPSILON
+        assert nu == EPSILON or nu == NULL
+        return nu == EPSILON
 
 
 class SymbolSet(Expression):
@@ -71,10 +70,10 @@ class SymbolSet(Expression):
         return self._codepoints
 
     def nu(self):
-        return self.NULL
+        return NULL
 
     def derivative(self, symbol):
-        return self.EPSILON if self._codepoints.has(symbol) else self.NULL
+        return EPSILON if self._codepoints.has(symbol) else NULL
 
 
 class Epsilon(Expression):
@@ -89,7 +88,7 @@ class Epsilon(Expression):
         return self
 
     def derivative(self, symbol):
-        return self.NULL
+        return NULL
 
 
 class KleeneClosure(Expression):
@@ -97,10 +96,10 @@ class KleeneClosure(Expression):
     def __new__(cls, expr):
         if isinstance(expr, KleeneClosure):
             return expr
-        elif expr == cls.EPSILON:
+        elif expr == EPSILON:
             return expr
-        elif expr == cls.NULL:
-            return cls.EPSILON
+        elif expr == NULL:
+            return EPSILON
 
         self = super().__new__(cls)
         self._expr = expr
@@ -113,7 +112,7 @@ class KleeneClosure(Expression):
         return self.__class__.__name__, self._expr
 
     def nu(self):
-        return self.EPSILON
+        return EPSILON
 
     def derivative(self, symbol):
         return Concatenation(self._expr.derivative(symbol), self)
@@ -139,8 +138,8 @@ class Complement(Expression):
 
     def nu(self):
         nu = self._expr.nu()
-        assert nu == self.EPSILON or nu == self.NULL
-        return self.NULL if nu == self.EPSILON else self.EPSILON
+        assert nu == EPSILON or nu == NULL
+        return NULL if nu == EPSILON else EPSILON
 
     def derivative(self, symbol):
         return Complement(self._expr.derivative(symbol))
@@ -152,13 +151,13 @@ class Concatenation(Expression):
         if isinstance(left, Concatenation):
             left, right = left._left, Concatenation(left._right, right)
 
-        if left == cls.NULL:
+        if left == NULL:
             return left
-        elif right == cls.NULL:
+        elif right == NULL:
             return right
-        elif left == cls.EPSILON:
+        elif left == EPSILON:
             return right
-        elif right == cls.EPSILON:
+        elif right == EPSILON:
             return left
 
         self = super().__new__(cls)
@@ -195,15 +194,15 @@ class LogicalOr(Expression):
             if isinstance(expr, cls):
                 stack.append(expr._left)
                 stack.append(expr._right)
-            elif expr == cls.NULL:
+            elif expr == NULL:
                 pass
-            elif expr == cls.SIGMA:
+            elif expr == SIGMA:
                 return expr
             else:
                 terms.add(expr)
 
         if not terms:
-            return cls.NULL
+            return NULL
 
         new = super().__new__
 
@@ -239,15 +238,15 @@ class LogicalAnd(Expression):
             if isinstance(expr, cls):
                 stack.append(expr._left)
                 stack.append(expr._right)
-            elif expr == cls.NULL:
+            elif expr == NULL:
                 return expr
-            elif expr == cls.SIGMA:
+            elif expr == SIGMA:
                 pass
             else:
                 terms.add(expr)
 
         if not terms:
-            return cls.SIGMA
+            return SIGMA
 
         new = super().__new__
 
@@ -273,8 +272,8 @@ class LogicalAnd(Expression):
                           self._right.derivative(symbol))
 
 
-Expression.EPSILON = Epsilon()
-Expression.NULL = SymbolSet()
-Expression.SIGMA = SymbolSet(codespace)
+EPSILON = Epsilon()
+SIGMA = SymbolSet(codespace)
+NULL = SymbolSet()
 
 # vim: sw=4
