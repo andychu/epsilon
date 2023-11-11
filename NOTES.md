@@ -1,4 +1,3 @@
-
 Notes
 =====
 
@@ -24,22 +23,25 @@ cli.py has this parser:
 
 ## TODO
 
+- Prune and Refactor
+  - delete unicode?
+  - delete `target_python`
+
+- Testing:
+  - ./run.sh nfa-suite
+  - ./run.sh test-tool -- well there are no assertions here
+  - ./backtrack.sh compare-syn-1 '' 20  -- bug to fix
+
+### rsc-regexp
+
+- Export NFAs to graphviz format -- compare "favorite regex" in NFA
+- Fix `a**` bug
+
+## Done
+
 - Make a command line interface that's compatible with rsc-regexp
-  - Then all the same tests to see if they work
-  - eliminate the ConfigParser stuff?
-    - well it does a similar thing as re2c
-
-  - Is the syntax compatible?
-    - well it uses ConfigParser, so NO
-  - So I want an alternative front end -- borrow re2post, and make the infix
-    nodes instead
-    - or possibly just compile postfix to regex.py node types
-
-### Next
-
 - Do the performance test for a?a?a?aaaa
-  - make sure it's linear time
-
+  - compilation is very slow!
 
 ## Understanding
 

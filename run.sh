@@ -153,7 +153,7 @@ test-tool() {
 
 }
 
-test-with-nfa-suite() {
+nfa-suite() {
   #../../oilshell/rsc-regexp/test $0 tool
   #bash -x ../../oilshell/rsc-regexp/test $0 tool
 

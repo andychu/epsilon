@@ -30,7 +30,7 @@ def main(argv):
         return 
 
     elapsed = time.time() - start_time
-    log('.%5f Parsed', elapsed)
+    log('%.5f Parsed', elapsed)
 
     #log(expr)
 
@@ -42,7 +42,7 @@ def main(argv):
     automaton = dfa.construct(vector)
 
     elapsed = time.time() - start_time
-    log('.%5f DFA', elapsed)
+    log('%.5f DFA', elapsed)
 
     #log(automaton)
     #log('')
@@ -65,7 +65,7 @@ def main(argv):
     except dfa.NoMatchError:
         print('NOPE')
 
-    log('.%5f Matched', elapsed)
+    log('%.5f Matched', elapsed)
 
     if 0:
         pid = os.getpid()
