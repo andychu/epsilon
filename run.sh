@@ -29,7 +29,7 @@ check() {
 format() {
   . _tmp/venv/bin/activate
 
-  #yapf -i py/nfa.py
+  yapf -i refactor/*.py
 }
 
 

@@ -34,12 +34,13 @@ def product_intersections(*sets):
     """
     return set(x[0].intersection(*x[1:]) for x in itertools.product(*sets))
 
+
 class IntegerSet(tuple):
     """An immutable set of integers, represented as sorted tuple of disjoint,
     non-contiguous ranges.
     """
 
-    def __new__(cls, iterable = ()):
+    def __new__(cls, iterable=()):
         """Return a new set of integers.
 
         :param iterable: an iterable of integers or integer ranges.
@@ -50,9 +51,10 @@ class IntegerSet(tuple):
         """
 
         def canonical(iterable):
-            ranges = sorted(filter(lambda r: r[0] <= r[1],
-                    ((x, x) if isinstance(x, int) else (int(x[0]), int(x[1]))
-                        for x in iterable)))
+            ranges = sorted(
+                filter(lambda r: r[0] <= r[1],
+                       ((x, x) if isinstance(x, int) else
+                        (int(x[0]), int(x[1])) for x in iterable)))
             if ranges:
                 r = ranges[0]
                 for s in ranges[1:]:
@@ -75,7 +77,7 @@ class IntegerSet(tuple):
         :param x: an integer
         :return: True if the integer is a member of the set.
         """
-        i = bisect.bisect(self, (x,))
+        i = bisect.bisect(self, (x, ))
         return (i < len(self) and x == self[i][0])\
                 or (i > 0 and self[i-1][0] <= x <= self[i-1][1])
 

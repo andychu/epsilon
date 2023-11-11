@@ -8,6 +8,7 @@ from . import dfa
 from . import parse
 from . import util
 
+
 def log(msg, *args):
     if 1:
         util.log(msg, *args)
@@ -26,7 +27,7 @@ def main(argv):
     except parse.SyntaxError as e:
         #print(e)
         print('bad regexp')  # the common protocol
-        return 
+        return
 
     elapsed = time.time() - start_time
     log('\t%.5f Parsed', elapsed)

@@ -24,26 +24,31 @@ from . import util
 log = util.log
 
 Automaton = collections.namedtuple("Automaton",
-        ["transitions", "accepts", "error"])
+                                   ["transitions", "accepts", "error"])
+
 
 class ExpressionVector(tuple):
+
     def __new__(cls, iterable):
         return super().__new__(cls, iterable)
 
     @property
     def NULL(self):
         return self.__class__((name, expr.NULL) for name, expr in self)
-    
+
     def nullable(self):
         return [name for name, expr in self if expr.nullable()]
-    
+
     def derivative(self, symbol):
         return ExpressionVector(
-                (name, expr.derivative(symbol)) for name, expr in self)
-  
+            (name, expr.derivative(symbol)) for name, expr in self)
+
     def derivative_classes(self):
-        return filter(None, functools.reduce(util.product_intersections, 
-                (expr.derivative_classes() for _, expr in self)))
+        return filter(
+            None,
+            functools.reduce(util.product_intersections,
+                             (expr.derivative_classes() for _, expr in self)))
+
 
 def construct(expr):
     """Construct an automaton from a regular expression.
@@ -74,7 +79,7 @@ def construct(expr):
                 states[nextstate] = len(states)
                 transitions.append([])
                 stack.append(nextstate)
-            
+
             nextnumber = states[nextstate]
             for first, last in derivative_class:
                 transitions[number].append((first, last, nextnumber))
@@ -87,18 +92,19 @@ def construct(expr):
 
         transitions[number].sort()
 
-
     accepts = [state.nullable() for state in states]
     error = states[expr.NULL]
     return Automaton(transitions, accepts, error)
 
+
 class NoMatchError(Exception):
+
     def __init__(self, atoms):
         msg = "No match for input {}".format(atoms)
         super().__init__(msg)
 
-def scan(automaton, iterable,
-        tosymbol = ord, pack = lambda atoms: "".join(atoms)):
+
+def scan(automaton, iterable, tosymbol=ord, pack=lambda atoms: "".join(atoms)):
     buffer, offset = [], 0
     state, accept, length = 0, False, 0
     atoms = iterable
@@ -123,11 +129,12 @@ def scan(automaton, iterable,
             transitions = automaton.transitions[state]
 
             # This is similar to util.IntegerSet.has(), but doesn't call it?
-            i = bisect.bisect(transitions, (symbol,))
+            i = bisect.bisect(transitions, (symbol, ))
             if i < len(transitions) and symbol == transitions[i][0]:
                 state = transitions[i][2]
-            elif i > 0 and transitions[i-1][0] <= symbol <= transitions[i-1][1]:
-                state = transitions[i-1][2]
+            elif i > 0 and (transitions[i - 1][0] <= symbol <= transitions[
+                    i - 1][1]):
+                state = transitions[i - 1][2]
             else:
                 state = automaton.error
             offset += 1

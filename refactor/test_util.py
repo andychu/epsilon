@@ -18,6 +18,7 @@ import random
 import unittest
 from . import util
 
+
 class TestIntegerSet(unittest.TestCase):
     ITERATIONS = 1000
     RANGE = 100
@@ -104,6 +105,7 @@ class TestIntegerSet(unittest.TestCase):
             x = util.IntegerSet(a).symmetric_difference(b)
             self.assertEqual(x, util.IntegerSet(b).symmetric_difference(a))
             self.assertEqual(x, util.IntegerSet(c))
+
 
 if __name__ == '__main__':
     unittest.main()

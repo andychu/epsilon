@@ -20,8 +20,10 @@ from . import regex
 from . import ucd
 from . import util
 
+
 class SyntaxError(Exception):
     """Thrown on a regular expression syntax error."""
+
 
 class _Buffer(list):
     """Parsing input buffer."""
@@ -39,7 +41,7 @@ class _Buffer(list):
         if c:
             self.append(c)
 
-    def readwhile(self, predicate, count = None):
+    def readwhile(self, predicate, count=None):
         consumed = []
         if count is None:
             while self and predicate(self[-1]):
@@ -56,6 +58,7 @@ class _Buffer(list):
                 raise SyntaxError("'{}' expected".format(wanted))
         return wanted
 
+
 def _unicode_property_codepoints(name):
     """Return the codepoints comprising a unicode property.
 
@@ -67,17 +70,17 @@ def _unicode_property_codepoints(name):
         if not keys:
             raise SyntaxError("unknown unicode category '{}'".format(name))
         elements = itertools.chain.from_iterable(
-                [ucd.general_categories[k] for k in keys])
+            [ucd.general_categories[k] for k in keys])
     elif name == "L&":
-        elements = itertools.chain(
-                ucd.general_categories["Lu"],
-                ucd.general_categories["Ll"],
-                ucd.general_categories["Lt"])
+        elements = itertools.chain(ucd.general_categories["Lu"],
+                                   ucd.general_categories["Ll"],
+                                   ucd.general_categories["Lt"])
     elif name in ucd.general_categories:
         elements = ucd.general_categories[name]
     else:
         raise SyntaxError("unknown unicode property '{}'".format(name))
     return util.IntegerSet(elements)
+
 
 class Parser:
     r"""A regular expression parser.
@@ -146,30 +149,40 @@ class Parser:
     _hex_digits = frozenset("0123456789ABCDEFabcdef")
 
     _horizontal_space = util.IntegerSet(
-            (0x09, 0x20, 0xa0, 0x1680, 0x180e,
-            (0x2000, 0x200a), 0x202f, 0x205f, 0x3000))
-    _vertical_space = util.IntegerSet(
-            ((0x0a, 0x0d), 0x85, 0x2028, 0x2029))
+        (0x09, 0x20, 0xa0, 0x1680, 0x180e, (0x2000, 0x200a), 0x202f, 0x205f,
+         0x3000))
+    _vertical_space = util.IntegerSet(((0x0a, 0x0d), 0x85, 0x2028, 0x2029))
 
     _escapes = {
-        "a": util.IntegerSet((0x07,)),
-        "b": util.IntegerSet((0x08,)),
-        "e": util.IntegerSet((0x1b,)),
-        "f": util.IntegerSet((0x0c,)),
-        "n": util.IntegerSet((0x0a,)),
-        "r": util.IntegerSet((0x0d,)),
-        "t": util.IntegerSet((0x09,)),
-        "d": util.IntegerSet(ucd.general_categories["Nd"]),
-        "h": _horizontal_space,
-        "s": util.IntegerSet(itertools.chain(
-            _unicode_property_codepoints("Z"),
-            _horizontal_space,
-            _vertical_space)),
-        "v": _vertical_space,
-        "w": util.IntegerSet(itertools.chain(
-            _unicode_property_codepoints("L"),
-            _unicode_property_codepoints("N"),
-            (0x5f,)))}
+        "a":
+        util.IntegerSet((0x07, )),
+        "b":
+        util.IntegerSet((0x08, )),
+        "e":
+        util.IntegerSet((0x1b, )),
+        "f":
+        util.IntegerSet((0x0c, )),
+        "n":
+        util.IntegerSet((0x0a, )),
+        "r":
+        util.IntegerSet((0x0d, )),
+        "t":
+        util.IntegerSet((0x09, )),
+        "d":
+        util.IntegerSet(ucd.general_categories["Nd"]),
+        "h":
+        _horizontal_space,
+        "s":
+        util.IntegerSet(
+            itertools.chain(_unicode_property_codepoints("Z"),
+                            _horizontal_space, _vertical_space)),
+        "v":
+        _vertical_space,
+        "w":
+        util.IntegerSet(
+            itertools.chain(_unicode_property_codepoints("L"),
+                            _unicode_property_codepoints("N"), (0x5f, )))
+    }
     _escapes["D"] = regex.unicode.codespace.difference(_escapes["d"])
     _escapes["H"] = regex.unicode.codespace.difference(_escapes["h"])
     _escapes["S"] = regex.unicode.codespace.difference(_escapes["s"])
@@ -226,24 +239,22 @@ class Parser:
         elif c == "*":
             expr = regex.unicode.KleeneClosure(expr)
         elif c == "+":
-            expr = regex.unicode.Concatenation(expr,
-                    regex.unicode.KleeneClosure(expr))
+            expr = regex.unicode.Concatenation(
+                expr, regex.unicode.KleeneClosure(expr))
         elif c == "{":
             mincount, maxcount = self._parse_count(buffer)
             expr = functools.reduce(
-                    lambda x, y: regex.unicode.Concatenation(x, y),
-                    itertools.repeat(expr, mincount),
-                    regex.unicode.Epsilon())
+                lambda x, y: regex.unicode.Concatenation(x, y),
+                itertools.repeat(expr, mincount), regex.unicode.Epsilon())
             if maxcount is None:
-                expr = regex.unicode.Concatenation(expr,
-                        regex.unicode.KleeneClosure(expr))
+                expr = regex.unicode.Concatenation(
+                    expr, regex.unicode.KleeneClosure(expr))
             else:
                 expr = functools.reduce(
-                        lambda x, y: regex.unicode.Concatenation(x,
-                            regex.unicode.LogicalOr(expr,
-                                regex.unicode.Epsilon())),
-                        itertools.repeat(expr, maxcount - mincount),
-                        expr)
+                    lambda x, y: regex.unicode.Concatenation(
+                        x,
+                        regex.unicode.LogicalOr(expr, regex.unicode.Epsilon())
+                    ), itertools.repeat(expr, maxcount - mincount), expr)
         else:
             buffer.push(c)
         return expr
@@ -305,7 +316,7 @@ class Parser:
             members.append(util.IntegerSet([ord(c)]))
             c = buffer.read()
 
-        while c != "-" and c!= "]":
+        while c != "-" and c != "]":
             buffer.push(c)
             members.append(self._parse_range(buffer))
             c = buffer.read()
@@ -344,9 +355,9 @@ class Parser:
         c = buffer.read()
         if c == "\\":
             return self._parse_quote(buffer)
-        elif c: 
+        elif c:
             assert c not in "-]"
-            return util.IntegerSet((ord(c),))
+            return util.IntegerSet((ord(c), ))
         else:
             raise SyntaxError("']' expected")
 
@@ -372,18 +383,17 @@ class Parser:
                 name = buffer.readwhile(lambda x: x != "}")
                 buffer.expect("}")
                 return regex.unicode.codespace.difference(
-                        _unicode_property_codepoints(name))
+                    _unicode_property_codepoints(name))
             elif c:
                 return regex.unicode.codespace.difference(
-                        _unicode_property_codepoints(c))
+                    _unicode_property_codepoints(c))
             else:
                 raise SyntaxError("property name expected")
         elif c in self._octal_digits:
-            digits = c + buffer.readwhile(
-                    lambda x: x in self._octal_digits, 2)
+            digits = c + buffer.readwhile(lambda x: x in self._octal_digits, 2)
             codepoint = int(digits, 8)
             if regex.unicode.codespace.has(codepoint):
-                return util.IntegerSet((codepoint,))
+                return util.IntegerSet((codepoint, ))
             raise SyntaxError("\\{}: codepoint out of range".format(digits))
         elif c == "o":
             buffer.expect("{")
@@ -393,9 +403,9 @@ class Parser:
             buffer.expect("}")
             codepoint = int(digits, 8)
             if regex.unicode.codespace.has(codepoint):
-                return util.IntegerSet((codepoint,))
+                return util.IntegerSet((codepoint, ))
             raise SyntaxError(
-                    "\\o{{{}}}: codepoint out of range".format(digits))
+                "\\o{{{}}}: codepoint out of range".format(digits))
         elif c == "x":
             c = buffer.read()
             if c == "{":
@@ -404,23 +414,23 @@ class Parser:
                     raise SyntaxError("hex digit expected")
                 buffer.expect("}")
             elif c in self._hex_digits:
-                digits = c + buffer.readwhile(
-                        lambda x: x in self._hex_digits, 1)
+                digits = c + buffer.readwhile(lambda x: x in self._hex_digits,
+                                              1)
                 if len(digits) != 2:
                     raise SyntaxError("exactly 2 hex digits expected")
             codepoint = int(digits, 16)
             if regex.unicode.codespace.has(codepoint):
-                return util.IntegerSet((codepoint,))
+                return util.IntegerSet((codepoint, ))
             print(codepoint, regex.unicode.codespace)
             raise SyntaxError(
-                    "\\x{{{}}}: codepoint out of range".format(digits))
+                "\\x{{{}}}: codepoint out of range".format(digits))
         elif c == "u":
             digits = buffer.readwhile(lambda x: x in self._hex_digits, 4)
             if len(digits) != 4:
                 raise SyntaxError("exactly 4 hex digits expected")
             codepoint = int(digits, 16)
             if regex.unicode.codespace.has(codepoint):
-                return util.IntegerSet((codepoint,))
+                return util.IntegerSet((codepoint, ))
             raise SyntaxError("\\u{}: codepoint out of range".format(digits))
         elif c == "U":
             digits = buffer.readwhile(lambda x: x in self._hex_digits, 8)
@@ -428,9 +438,9 @@ class Parser:
                 raise SyntaxError("exactly 8 hex digits expected")
             codepoint = int(digits, 16)
             if regex.unicode.codespace.has(codepoint):
-                return util.IntegerSet((codepoint,))
+                return util.IntegerSet((codepoint, ))
             raise SyntaxError("\\U{}: odepoint out of range".format(digits))
         elif c:
-            return util.IntegerSet((ord(c),))
+            return util.IntegerSet((ord(c), ))
         else:
             raise SyntaxError("character expected after '\\'")
