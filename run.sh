@@ -127,7 +127,8 @@ cli() {
 }
 
 tool() {
-  python3 -m epsilon.tool "$@"
+  #python3 -m epsilon.tool "$@"
+  python3 -m refactor.tool "$@"
 }
 
 test-tool() {
