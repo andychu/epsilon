@@ -43,11 +43,15 @@ class ExpressionVector(tuple):
         return ExpressionVector(
             (name, expr.derivative(symbol)) for name, expr in self)
 
-    def derivative_classes(self):
+
+def DerivClasses(state):
+    if isinstance(state, ExpressionVector):
         return filter(
             None,
             functools.reduce(util.product_intersections,
-                             (expr.derivative_classes() for _, expr in self)))
+                             (expr.derivative_classes() for _, expr in state)))
+    else:
+        return state.derivative_classes()
 
 
 def construct(expr):
@@ -72,7 +76,7 @@ def construct(expr):
         # a?a has 4 states.  Linear in the size of the pattern
         log('number = %d', number)
 
-        for derivative_class in state.derivative_classes():
+        for derivative_class in DerivClasses(state):
             symbol = derivative_class[0][0]
             nextstate = state.derivative(symbol)
             if nextstate not in states:
@@ -132,8 +136,8 @@ def scan(automaton, iterable, tosymbol=ord, pack=lambda atoms: "".join(atoms)):
             i = bisect.bisect(transitions, (symbol, ))
             if i < len(transitions) and symbol == transitions[i][0]:
                 state = transitions[i][2]
-            elif i > 0 and (transitions[i - 1][0] <= symbol <= transitions[
-                    i - 1][1]):
+            elif i > 0 and (transitions[i - 1][0] <= symbol <=
+                            transitions[i - 1][1]):
                 state = transitions[i - 1][2]
             else:
                 state = automaton.error
@@ -158,3 +162,6 @@ def scan(automaton, iterable, tosymbol=ord, pack=lambda atoms: "".join(atoms)):
             #elapsed = time.time() - start_time
             #util.log('%d iterations in %.5f seconds', 100, elapsed)
             pass
+
+
+# vim: sw=4

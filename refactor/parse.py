@@ -183,18 +183,18 @@ class Parser:
             itertools.chain(_unicode_property_codepoints("L"),
                             _unicode_property_codepoints("N"), (0x5f, )))
     }
-    _escapes["D"] = regex.unicode.codespace.difference(_escapes["d"])
-    _escapes["H"] = regex.unicode.codespace.difference(_escapes["h"])
-    _escapes["S"] = regex.unicode.codespace.difference(_escapes["s"])
-    _escapes["V"] = regex.unicode.codespace.difference(_escapes["v"])
-    _escapes["W"] = regex.unicode.codespace.difference(_escapes["w"])
+    _escapes["D"] = regex.codespace.difference(_escapes["d"])
+    _escapes["H"] = regex.codespace.difference(_escapes["h"])
+    _escapes["S"] = regex.codespace.difference(_escapes["s"])
+    _escapes["V"] = regex.codespace.difference(_escapes["v"])
+    _escapes["W"] = regex.codespace.difference(_escapes["w"])
 
     def _parse_logical_or(self, buffer):
         expr = self._parse_logical_and(buffer)
         c = buffer.read()
         while c == '|':
             right = self._parse_logical_and(buffer)
-            expr = regex.unicode.LogicalOr(expr, right)
+            expr = regex.LogicalOr(expr, right)
             c = buffer.read()
         else:
             buffer.push(c)
@@ -205,7 +205,7 @@ class Parser:
         c = buffer.read()
         while c == '&':
             right = self._parse_complement(buffer)
-            expr = regex.unicode.LogicalAnd(expr, right)
+            expr = regex.LogicalAnd(expr, right)
             c = buffer.read()
         else:
             buffer.push(c)
@@ -219,42 +219,39 @@ class Parser:
         else:
             buffer.push(c)
         expr = self._parse_concatenation(buffer)
-        return regex.unicode.Complement(expr) if complement else expr
+        return regex.Complement(expr) if complement else expr
 
     def _parse_concatenation(self, buffer):
-        expr = regex.unicode.Epsilon()
+        expr = regex.Epsilon()
         while buffer:
             length = len(buffer)
             right = self._parse_quantification(buffer)
             if length == len(buffer):
                 break
-            expr = regex.unicode.Concatenation(expr, right)
+            expr = regex.Concatenation(expr, right)
         return expr
 
     def _parse_quantification(self, buffer):
         expr = self._parse_element(buffer)
         c = buffer.read()
         if c == "?":
-            expr = regex.unicode.LogicalOr(expr, regex.unicode.Epsilon())
+            expr = regex.LogicalOr(expr, regex.Epsilon())
         elif c == "*":
-            expr = regex.unicode.KleeneClosure(expr)
+            expr = regex.KleeneClosure(expr)
         elif c == "+":
-            expr = regex.unicode.Concatenation(
-                expr, regex.unicode.KleeneClosure(expr))
+            expr = regex.Concatenation(expr, regex.KleeneClosure(expr))
         elif c == "{":
             mincount, maxcount = self._parse_count(buffer)
-            expr = functools.reduce(
-                lambda x, y: regex.unicode.Concatenation(x, y),
-                itertools.repeat(expr, mincount), regex.unicode.Epsilon())
+            expr = functools.reduce(lambda x, y: regex.Concatenation(x, y),
+                                    itertools.repeat(expr, mincount),
+                                    regex.Epsilon())
             if maxcount is None:
-                expr = regex.unicode.Concatenation(
-                    expr, regex.unicode.KleeneClosure(expr))
+                expr = regex.Concatenation(expr, regex.KleeneClosure(expr))
             else:
                 expr = functools.reduce(
-                    lambda x, y: regex.unicode.Concatenation(
-                        x,
-                        regex.unicode.LogicalOr(expr, regex.unicode.Epsilon())
-                    ), itertools.repeat(expr, maxcount - mincount), expr)
+                    lambda x, y: regex.Concatenation(
+                        x, regex.LogicalOr(expr, regex.Epsilon())),
+                    itertools.repeat(expr, maxcount - mincount), expr)
         else:
             buffer.push(c)
         return expr
@@ -289,15 +286,15 @@ class Parser:
             expr = self._parse_logical_or(buffer)
             buffer.expect(")")
         elif c == ".":
-            expr = regex.unicode.SymbolSet(regex.unicode.codespace)
+            expr = regex.SymbolSet(regex.codespace)
         elif c == "[":
             expr = self._parse_class(buffer)
         elif c == "\\":
-            expr = regex.unicode.SymbolSet(self._parse_quote(buffer))
+            expr = regex.SymbolSet(self._parse_quote(buffer))
         elif c not in self._metacharacters:
-            expr = regex.unicode.SymbolSet([ord(c)])
+            expr = regex.SymbolSet([ord(c)])
         else:
-            expr = regex.unicode.Epsilon()
+            expr = regex.Epsilon()
             buffer.push(c)
         return expr
 
@@ -332,8 +329,8 @@ class Parser:
 
         codepoints = util.IntegerSet(itertools.chain.from_iterable(members))
         if complement:
-            codepoints = regex.unicode.codespace.difference(codepoints)
-        return regex.unicode.SymbolSet(codepoints)
+            codepoints = regex.codespace.difference(codepoints)
+        return regex.SymbolSet(codepoints)
 
     def _parse_range(self, buffer):
         """Return an IntegerSet of codepoints."""
@@ -382,17 +379,17 @@ class Parser:
             if c == "{":
                 name = buffer.readwhile(lambda x: x != "}")
                 buffer.expect("}")
-                return regex.unicode.codespace.difference(
+                return regex.codespace.difference(
                     _unicode_property_codepoints(name))
             elif c:
-                return regex.unicode.codespace.difference(
+                return regex.codespace.difference(
                     _unicode_property_codepoints(c))
             else:
                 raise SyntaxError("property name expected")
         elif c in self._octal_digits:
             digits = c + buffer.readwhile(lambda x: x in self._octal_digits, 2)
             codepoint = int(digits, 8)
-            if regex.unicode.codespace.has(codepoint):
+            if regex.codespace.has(codepoint):
                 return util.IntegerSet((codepoint, ))
             raise SyntaxError("\\{}: codepoint out of range".format(digits))
         elif c == "o":
@@ -402,7 +399,7 @@ class Parser:
                 raise SyntaxError("octal digit expected")
             buffer.expect("}")
             codepoint = int(digits, 8)
-            if regex.unicode.codespace.has(codepoint):
+            if regex.codespace.has(codepoint):
                 return util.IntegerSet((codepoint, ))
             raise SyntaxError(
                 "\\o{{{}}}: codepoint out of range".format(digits))
@@ -419,9 +416,9 @@ class Parser:
                 if len(digits) != 2:
                     raise SyntaxError("exactly 2 hex digits expected")
             codepoint = int(digits, 16)
-            if regex.unicode.codespace.has(codepoint):
+            if regex.codespace.has(codepoint):
                 return util.IntegerSet((codepoint, ))
-            print(codepoint, regex.unicode.codespace)
+            print(codepoint, regex.codespace)
             raise SyntaxError(
                 "\\x{{{}}}: codepoint out of range".format(digits))
         elif c == "u":
@@ -429,7 +426,7 @@ class Parser:
             if len(digits) != 4:
                 raise SyntaxError("exactly 4 hex digits expected")
             codepoint = int(digits, 16)
-            if regex.unicode.codespace.has(codepoint):
+            if regex.codespace.has(codepoint):
                 return util.IntegerSet((codepoint, ))
             raise SyntaxError("\\u{}: codepoint out of range".format(digits))
         elif c == "U":
@@ -437,7 +434,7 @@ class Parser:
             if len(digits) != 8:
                 raise SyntaxError("exactly 8 hex digits expected")
             codepoint = int(digits, 16)
-            if regex.unicode.codespace.has(codepoint):
+            if regex.codespace.has(codepoint):
                 return util.IntegerSet((codepoint, ))
             raise SyntaxError("\\U{}: odepoint out of range".format(digits))
         elif c:
