@@ -109,8 +109,12 @@ class TestIntegerSet(unittest.TestCase):
             a = set(random.sample(range(self.RANGE), self.SAMPLES))
             b = set(random.sample(range(self.RANGE), self.SAMPLES))
             c = a | b
-            x = util.IntegerSet(a).union(b)
-            self.assertEqual(x, util.IntegerSet(b).union(a))
+
+            a_ = util.IntegerSet(a)
+            b_ = util.IntegerSet(b)
+            x = a_.union(b_)
+
+            self.assertEqual(x, b_.union(a_))
             self.assertEqual(x, util.IntegerSet(c))
 
     def test_intersection(self):
@@ -118,8 +122,12 @@ class TestIntegerSet(unittest.TestCase):
             a = set(random.sample(range(self.RANGE), self.SAMPLES))
             b = set(random.sample(range(self.RANGE), self.SAMPLES))
             c = a & b
-            x = util.IntegerSet(a).intersection(b)
-            self.assertEqual(x, util.IntegerSet(b).intersection(a))
+
+            a_ = util.IntegerSet(a)
+            b_ = util.IntegerSet(b)
+
+            x = a_.intersection(b_)
+            self.assertEqual(x, b_.intersection(a_))
             self.assertEqual(x, util.IntegerSet(c))
 
     def test_difference(self):
@@ -127,7 +135,11 @@ class TestIntegerSet(unittest.TestCase):
             a = set(random.sample(range(self.RANGE), self.SAMPLES))
             b = set(random.sample(range(self.RANGE), self.SAMPLES))
             c = a - b
-            x = util.IntegerSet(a).difference(b)
+
+            a_ = util.IntegerSet(a)
+            b_ = util.IntegerSet(b)
+
+            x = a_.difference(b_)
             self.assertEqual(x, util.IntegerSet(c))
 
     if 0:

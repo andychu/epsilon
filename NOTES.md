@@ -24,11 +24,12 @@ cli.py has this parser:
 ## TODO
 
 - Figure out why a?a?a?aaa is blowing up
-- Write test harness / unit tests for ExpressionVector
-  - do a JSON lexer I guess
+  - is the existing canonicalization OK, or do we need a new approach?
+  - it's based on tuples.  Maybe write some unit tests
+
 - Add static typing
   - ExpressionVector might become separate
-
+  - canonicalization seems like an issue
 
 ### Testing
 
@@ -42,24 +43,25 @@ cli.py has this parser:
 - Export NFAs to graphviz format -- compare "favorite regex" in NFA
 - Fix `a**` bug
 
+Markdown/blog:
+
+- add timing of NFA vs. backtracking node.js
+  - add note that I couldn't repro cloudflare issue.  Theory: it's capturing
+  - I think their explanation of Perl 5 RegexpDebugger is simply wrong -- it's
+    an overly naive view of PCRE.
+
+- Add note that I made "my favorite" regex work
+
 ## Done
 
 - Make a command line interface that's compatible with rsc-regexp
 - Do the performance test for a?a?a?aaaa
   - compilation is very slow!
 - Prune unused code and Refactor into functional style
+- Write test harness / unit tests for ExpressionVector
+  - do a JSON lexer I guess
 
 ## Understanding
-
-- refactor from object-oriented style to functional style
-  - e.g. the `derivative_classes()` method and so forth
-
-  - but do we have a good test suite?
-    - no, we only have `test_{parse,util}.py`
-
-- TODO: OK let's write unit tests and shell tests for it!
-
-- Maybe add some type anotations?
 
 - see what we need for smart constructors
 

@@ -87,8 +87,8 @@ class IntegerSet(tuple):
 
         def issubset(self, other):
             """Test whether every integer in the set is in other."""
-            if not isinstance(other, self.__class__):
-                other = self.__class__(other)
+            #if not isinstance(other, self.__class__):
+            #    other = self.__class__(other)
 
             i = iter(other)
             r = next(i, None)
@@ -101,8 +101,8 @@ class IntegerSet(tuple):
 
     def issuperset(self, other):
         """Test whether every integer in other is in the set."""
-        if not isinstance(other, self.__class__):
-            other = self.__class__(other)
+        #if not isinstance(other, self.__class__):
+        #    other = self.__class__(other)
 
         i = iter(self)
         r = next(i, None)
@@ -121,8 +121,8 @@ class IntegerSet(tuple):
         """Return a new set with integers common to the set and all others."""
         intersection = self
         for other in others:
-            if not isinstance(other, self.__class__):
-                other = self.__class__(other)
+            #if not isinstance(other, self.__class__):
+            #    other = self.__class__(other)
 
             ranges = []
             i, j = iter(intersection), iter(other)
@@ -140,8 +140,8 @@ class IntegerSet(tuple):
         """Return a new set with integers in the set but not in the others."""
         difference = self
         for other in others:
-            if not isinstance(other, self.__class__):
-                other = self.__class__(other)
+            #if not isinstance(other, self.__class__):
+            #    other = self.__class__(other)
 
             ranges = []
             i, j = iter(difference), iter(other)
@@ -173,6 +173,6 @@ class IntegerSet(tuple):
             """Return a new set with integers in either the set or other,
             but not both.
             """
-            if not isinstance(other, self.__class__):
-                other = self.__class__(other)
+            #if not isinstance(other, self.__class__):
+            #    other = self.__class__(other)
             return self.difference(other).union(other.difference(self))
