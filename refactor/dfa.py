@@ -121,9 +121,34 @@ def Derivative(state: regex.Expression, symbol: str):
         return regex.Not(Derivative(state._expr, symbol))
 
     elif isinstance(state, regex.Cat):
-        return regex.Or(
-            regex.Cat(Derivative(state._left, symbol), state._right),
-            regex.Cat(Nu(state._left), Derivative(state._right, symbol)))
+        if 1:
+            return regex.Or(
+                regex.Cat(Derivative(state._left, symbol), state._right),
+                regex.Cat(Nu(state._left), Derivative(state._right, symbol)))
+        if 1:
+            # STILL SLOW -- duplicate state.right
+            return regex.Or(state._right, Derivative(state._right, symbol))
+        if 0:
+            # FAST
+            return regex.Or(regex.EPSILON, Derivative(state._right, symbol))
+        if 0:
+            # FAST
+            return regex.Cat(Nu(state._left), Derivative(state._right, symbol))
+        if 0:
+            # FAST
+            return regex.Or(
+                regex.Cat(Derivative(state._left, symbol), state._right),
+                regex.Cat(Nu(state._left), regex.EPSILON))
+        if 0:
+            # FAST
+            return regex.Or(
+                regex.Cat(regex.EPSILON, state._right),
+                regex.Cat(Nu(state._left), regex.EPSILON))
+        if 0:
+            # This one is still slow!
+            return regex.Or(
+                regex.Cat(regex.EPSILON, state._right),
+                regex.Cat(Nu(state._left), Derivative(state._right, symbol)))
 
     elif isinstance(state, regex.Or):
         return regex.Or(Derivative(state._left, symbol),
@@ -224,9 +249,9 @@ def construct(expr: Any) -> Automaton:
 
             i += 1
             if i % 1 == 0:
-                d_elapsed = time.time() - start_time
-                util.log('%d iterations in %.5f seconds - %.5f', i, d_elapsed,
-                         state_elapsed)
+                #d_elapsed = time.time() - start_time
+                #util.log('%d iterations in %.5f seconds - %.5f', i, d_elapsed,
+                #         state_elapsed)
                 pass
 
         transitions[number].sort()

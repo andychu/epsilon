@@ -97,6 +97,10 @@ unit-tests() {
   # TestIntegerSet.test_prod
 }
 
+perf-bug() {
+  python3 -m refactor.test_dfa TestDfa.testBacktracking
+}
+
 execute() {
   local name=${1:-string}
   cli -t execute examples/$name.epsilon
