@@ -100,6 +100,42 @@ def DerivClasses(state):
         #return state.derivative_classes()
 
 
+def Derivative(state, symbol):
+    #log('state %s', state)
+    if isinstance(state, ExpressionVector):
+        return ExpressionVector(
+            (name, Derivative(expr, symbol)) for name, expr in state)
+
+    elif isinstance(state, regex.Epsilon):
+        return regex.NULL
+
+    elif isinstance(state, regex.SymbolSet):
+        return regex.EPSILON if state._codepoints.has(symbol) else regex.NULL
+
+    elif isinstance(state, regex.KleeneClosure):
+        return regex.Concatenation(Derivative(state._expr, symbol), state)
+
+    elif isinstance(state, regex.Complement):
+        return regex.Complement(Derivative(state._expr, symbol))
+
+    elif isinstance(state, regex.Concatenation):
+        return regex.LogicalOr(
+            regex.Concatenation(Derivative(state._left, symbol), state._right),
+            regex.Concatenation(state._left.nu(),
+                                Derivative(state._right, symbol)))
+
+    elif isinstance(state, regex.LogicalOr):
+        return regex.LogicalOr(Derivative(state._left, symbol),
+                               Derivative(state._right, symbol))
+
+    elif isinstance(state, regex.LogicalAnd):
+        return regex.LogicalAnd(Derivative(state._left, symbol),
+                                Derivative(state._right, symbol))
+
+    else:
+        raise AssertionError(state)
+
+
 def construct(expr):
     """Construct an automaton from a regular expression.
 
@@ -124,7 +160,7 @@ def construct(expr):
 
         for derivative_class in DerivClasses(state):
             symbol = derivative_class[0][0]
-            nextstate = state.derivative(symbol)
+            nextstate = Derivative(state, symbol)
             if nextstate not in states:
                 states[nextstate] = len(states)
                 transitions.append([])

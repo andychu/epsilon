@@ -72,9 +72,6 @@ class SymbolSet(Expression):
     def nu(self):
         return NULL
 
-    def derivative(self, symbol):
-        return EPSILON if self._codepoints.has(symbol) else NULL
-
 
 class Epsilon(Expression):
 
@@ -86,9 +83,6 @@ class Epsilon(Expression):
 
     def nu(self):
         return self
-
-    def derivative(self, symbol):
-        return NULL
 
 
 class KleeneClosure(Expression):
@@ -114,9 +108,6 @@ class KleeneClosure(Expression):
     def nu(self):
         return EPSILON
 
-    def derivative(self, symbol):
-        return Concatenation(self._expr.derivative(symbol), self)
-
 
 class Complement(Expression):
 
@@ -140,9 +131,6 @@ class Complement(Expression):
         nu = self._expr.nu()
         assert nu == EPSILON or nu == NULL
         return NULL if nu == EPSILON else EPSILON
-
-    def derivative(self, symbol):
-        return Complement(self._expr.derivative(symbol))
 
 
 class Concatenation(Expression):
@@ -174,11 +162,6 @@ class Concatenation(Expression):
 
     def nu(self):
         return LogicalAnd(self._left.nu(), self._right.nu())
-
-    def derivative(self, symbol):
-        return LogicalOr(
-            Concatenation(self._left.derivative(symbol), self._right),
-            Concatenation(self._left.nu(), self._right.derivative(symbol)))
 
 
 class LogicalOr(Expression):
@@ -223,10 +206,6 @@ class LogicalOr(Expression):
     def nu(self):
         return LogicalOr(self._left.nu(), self._right.nu())
 
-    def derivative(self, symbol):
-        return LogicalOr(self._left.derivative(symbol),
-                         self._right.derivative(symbol))
-
 
 class LogicalAnd(Expression):
 
@@ -266,10 +245,6 @@ class LogicalAnd(Expression):
 
     def nu(self):
         return LogicalAnd(self._left.nu(), self._right.nu())
-
-    def derivative(self, symbol):
-        return LogicalAnd(self._left.derivative(symbol),
-                          self._right.derivative(symbol))
 
 
 EPSILON = Epsilon()
