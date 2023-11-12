@@ -84,10 +84,16 @@ count() {
   ls refactor/*.py | grep -v ucd.py | xargs wc -l
 }
 
-orig-tests() {
+tox-tests() {
   . _tmp/venv/bin/activate
 
   python3 -m tox
+}
+
+unit-tests() {
+  python3 -m refactor.test_util "$@"
+  python3 -m refactor.test_parse "$@"
+  # TestIntegerSet.test_prod
 }
 
 execute() {

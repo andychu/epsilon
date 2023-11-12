@@ -27,26 +27,31 @@ Automaton = collections.namedtuple("Automaton",
                                    ["transitions", "accepts", "error"])
 
 
-def product_intersections(*sets):
+def product_intersections(sets):
     """Return the intersections of the cartesian product of sequences of sets.
 
     :param sets: Iterables sof sets.
     :return: A set of intersections.
     """
+    # intersection() method accepts multiple
     return set(x[0].intersection(*x[1:]) for x in itertools.product(*sets))
+
+
+def ProductIntersect(a, b):
+    return set(
+        left.intersection(right) for left, right in itertools.product(a, b))
 
 
 def DerivClasses(state):
     #log('state %s', state)
     if isinstance(state, regex.ExpressionVector):
         classes = (DerivClasses(expr) for _, expr in state)
-        return filter(None, product_intersections(*classes))
+        return filter(None, product_intersections(classes))
 
     elif isinstance(state, regex.Epsilon):
         return {regex.codespace}
 
     elif isinstance(state, regex.SymbolSet):
-        #raise AssertionError()
         return {
             state._codepoints,
             regex.codespace.difference(state._codepoints)
@@ -62,22 +67,22 @@ def DerivClasses(state):
         if Nullable(state._left):
             return filter(
                 None,
-                product_intersections(DerivClasses(state._left),
-                                      DerivClasses(state._right)))
+                ProductIntersect(DerivClasses(state._left),
+                                 DerivClasses(state._right)))
         else:
             return DerivClasses(state._left)
 
     elif isinstance(state, regex.LogicalOr):
         return filter(
             None,
-            product_intersections(DerivClasses(state._left),
-                                  DerivClasses(state._right)))
+            ProductIntersect(DerivClasses(state._left),
+                             DerivClasses(state._right)))
 
     elif isinstance(state, regex.LogicalAnd):
         return filter(
             None,
-            product_intersections(DerivClasses(state._left),
-                                  DerivClasses(state._right)))
+            ProductIntersect(DerivClasses(state._left),
+                             DerivClasses(state._right)))
 
     else:
         raise AssertionError(state)

@@ -40,6 +40,8 @@ class Expression:
     def __eq__(self, expr):
         return self._orderby() == expr._orderby()
 
+    # Ordering is used to normalize OR / AND clauses.  See 2 sorted() call
+    # below
     def __lt__(self, expr):
         return self._orderby() < expr._orderby()
 
@@ -62,10 +64,6 @@ class SymbolSet(Expression):
 
     def _orderby(self):
         return self.__class__.__name__, self._codepoints
-
-    @property
-    def codepoints(self):
-        return self._codepoints
 
 
 class Epsilon(Expression):
@@ -104,7 +102,7 @@ class Complement(Expression):
         if isinstance(expr, Complement):
             return expr._expr
         elif isinstance(expr, SymbolSet):
-            return SymbolSet(codespace.difference(expr.codepoints))
+            return SymbolSet(codespace.difference(expr._codepoints))
 
         self = super().__new__(cls)
         self._expr = expr
@@ -115,11 +113,6 @@ class Complement(Expression):
 
     def _orderby(self):
         return self.__class__.__name__, self._expr
-
-    def nu(self):
-        nu = self._expr.nu()
-        assert nu == EPSILON or nu == NULL
-        return NULL if nu == EPSILON else EPSILON
 
 
 class Concatenation(Expression):
@@ -154,7 +147,7 @@ class LogicalOr(Expression):
 
     def __new__(cls, left, right):
         if isinstance(left, SymbolSet) and isinstance(right, SymbolSet):
-            return SymbolSet(left.codepoints.union(right.codepoints))
+            return SymbolSet(left._codepoints.union(right._codepoints))
 
         terms = set()
         stack = [left, right]

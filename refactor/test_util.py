@@ -14,15 +14,44 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import itertools
 import random
 import unittest
+from . import dfa
 from . import util
+from . import regex
 
 
 class TestIntegerSet(unittest.TestCase):
     ITERATIONS = 1000
     RANGE = 100
     SAMPLES = 50
+
+    def test_prod(self):
+        # This gets compressed
+        a = util.IntegerSet([1, 2, 3])
+        b = util.IntegerSet([2, 3, 42])
+
+        left = {a, regex.codespace.difference(a)}
+        right = {b, regex.codespace.difference(b)}
+        print('A', a)
+        print('B', b)
+        print('LEFT', left)
+        print('RIGHT', right)
+        print()
+
+        for p in itertools.product(left, right):
+            print('P %s' % (p, ))
+
+        #result = dfa.product_intersections(a, b)
+        many = dfa.product_intersections([left, right])
+        print('MANY', many)
+
+        pair = dfa.ProductIntersect(left, right)
+        print('PAIR', pair)
+
+        # Test that these computations are equivalent
+        self.assertEqual(many, pair)
 
     def test_construction(self):
         for i in range(self.ITERATIONS):
