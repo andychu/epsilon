@@ -86,7 +86,7 @@ def main(argv):
 
         name = 'main'
         # Singleton
-        vector = regex.ExpressionVector([(name, expr)])
+        vector = regex.RegularVector([(name, expr)])
         #log(vector)
 
         automaton = dfa.construct(vector)
@@ -145,7 +145,7 @@ def main(argv):
                     print('PAT', pat)
                     print('PARSED', parsed)
 
-            vector = regex.ExpressionVector(
+            vector = regex.RegularVector(
                 (token, parser.parse(section[token].replace("\n", "")))
                 for token in tokens)
             automaton = dfa.construct(vector)

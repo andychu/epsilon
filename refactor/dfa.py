@@ -41,6 +41,12 @@ def product_intersections(sets):
     """
     # intersection() method accepts multiple
     return set(x[0].intersection(*x[1:]) for x in itertools.product(*sets))
+    """
+    result = set()
+    for x in itertools.product(*sets):
+        result.add(x[0].intersection(*x[1:]))
+    return result
+    """
 
 
 def ProductIntersect(a: util.IntegerSet, b: util.IntegerSet):
@@ -50,7 +56,7 @@ def ProductIntersect(a: util.IntegerSet, b: util.IntegerSet):
 
 def DerivClasses(state):
     #log('state %s', state)
-    if isinstance(state, regex.ExpressionVector):
+    if isinstance(state, regex.RegularVector):
         classes = (DerivClasses(expr) for _, expr in state)
         return filter(None, product_intersections(classes))
 
@@ -97,8 +103,8 @@ def DerivClasses(state):
 
 def Derivative(state, symbol):
     #log('state %s', state)
-    if isinstance(state, regex.ExpressionVector):
-        return regex.ExpressionVector(
+    if isinstance(state, regex.RegularVector):
+        return regex.RegularVector(
             (name, Derivative(expr, symbol)) for name, expr in state)
 
     elif isinstance(state, regex.Epsilon):
@@ -131,16 +137,8 @@ def Derivative(state, symbol):
         raise AssertionError(state)
 
 
-def NullValue(state):
-    if isinstance(state, regex.ExpressionVector):
-        return regex.ExpressionVector(
-            (name, regex.NULL) for name, expr in state)
-    else:
-        return regex.NULL
-
-
 def Nullable(state):
-    if isinstance(state, regex.ExpressionVector):
+    if isinstance(state, regex.RegularVector):
         return [name for name, expr in state if Nullable(expr)]
     else:
         nu = Nu(state)
@@ -180,11 +178,11 @@ def Nu(state):
 def construct(expr: Any) -> Automaton:
     """Construct an automaton from a regular expression.
 
-    :param expr: a regular expression or a ExpressionVector.
+    :param expr: a regular expression or a RegularVector.
     :return: 
     """
     states: Dict[Any, int] = {expr: 0}
-    transitions: List[List[Tuple[int, int, int]]] = [[]]  
+    transitions: List[List[Tuple[int, int, int]]] = [[]]
 
     start_time = time.time()
     i = 0
@@ -199,8 +197,8 @@ def construct(expr: Any) -> Automaton:
         # a?a has 4 states.  Linear in the size of the pattern
         log('number = %d', number)
 
-        for derivative_class in DerivClasses(state):
-            symbol = derivative_class[0][0]
+        for deriv_class in DerivClasses(state):
+            symbol = deriv_class[0][0]
             nextstate = Derivative(state, symbol)
             if nextstate not in states:
                 states[nextstate] = len(states)
@@ -208,7 +206,7 @@ def construct(expr: Any) -> Automaton:
                 stack.append(nextstate)
 
             nextnumber = states[nextstate]
-            for first, last in derivative_class:
+            for first, last in deriv_class:
                 transitions[number].append((first, last, nextnumber))
 
                 i += 1
@@ -220,8 +218,16 @@ def construct(expr: Any) -> Automaton:
         transitions[number].sort()
 
     accepts = [Nullable(state) for state in states]
-    error = states[NullValue(expr)]
-    return Automaton(transitions, accepts, error)
+
+    assert isinstance(expr, regex.RegularVector)
+
+    # Null value for "regular vector" from paper
+    null_value = regex.RegularVector(
+        (name, regex.NULL) for name, expr in state)
+
+    # Should this be called "error" or something else?
+    error_num = states[null_value]
+    return Automaton(transitions, accepts, error_num)
 
 
 class NoMatchError(Exception):

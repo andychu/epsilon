@@ -17,8 +17,8 @@ class TestDfa(unittest.TestCase):
             ('identifier', r'[a-zA-Z][a-zA-Z0-9]+'),
             ('whitespace', r'[ ]+'),
         ]
-        vector = regex.ExpressionVector([(name, parser.parse(pat))
-                                         for name, pat in lexer])
+        vector = regex.RegularVector([(name, parser.parse(pat))
+                                      for name, pat in lexer])
         print(vector)
         automaton = dfa.construct(vector)
 

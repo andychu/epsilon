@@ -115,7 +115,7 @@ class IntegerSet(tuple):
 
     def union(self, *others):
         """Return a new set with integers from the set and all others."""
-        return self.__class__(itertools.chain(self, *others))
+        return IntegerSet(itertools.chain(self, *others))
 
     def intersection(self, *others):
         """Return a new set with integers common to the set and all others."""
@@ -133,7 +133,7 @@ class IntegerSet(tuple):
                     ranges.append((x, y))
                 r = r if r[1] > y else next(i, None)
                 s = s if s[1] > y else next(j, None)
-            intersection = self.__class__(ranges)
+            intersection = IntegerSet(ranges)
         return intersection
 
     def difference(self, *others):
@@ -164,7 +164,7 @@ class IntegerSet(tuple):
                 else:
                     ranges.append(r)
                     r = next(i, None)
-            difference = self.__class__(ranges)
+            difference = IntegerSet(ranges)
         return difference
 
     if 0:
