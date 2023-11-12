@@ -27,15 +27,6 @@ Automaton = collections.namedtuple("Automaton",
                                    ["transitions", "accepts", "error"])
 
 
-class ExpressionVector(tuple):
-
-    def __new__(cls, iterable):
-        return super().__new__(cls, iterable)
-
-    def NullValue(self):
-        return self.__class__((name, regex.NULL) for name, expr in self)
-
-
 def product_intersections(*sets):
     """Return the intersections of the cartesian product of sequences of sets.
 
@@ -47,7 +38,7 @@ def product_intersections(*sets):
 
 def DerivClasses(state):
     #log('state %s', state)
-    if isinstance(state, ExpressionVector):
+    if isinstance(state, regex.ExpressionVector):
         classes = (DerivClasses(expr) for _, expr in state)
         return filter(None, product_intersections(*classes))
 
@@ -95,8 +86,8 @@ def DerivClasses(state):
 
 def Derivative(state, symbol):
     #log('state %s', state)
-    if isinstance(state, ExpressionVector):
-        return ExpressionVector(
+    if isinstance(state, regex.ExpressionVector):
+        return regex.ExpressionVector(
             (name, Derivative(expr, symbol)) for name, expr in state)
 
     elif isinstance(state, regex.Epsilon):
@@ -129,8 +120,16 @@ def Derivative(state, symbol):
         raise AssertionError(state)
 
 
+def NullValue(state):
+    if isinstance(state, regex.ExpressionVector):
+        return regex.ExpressionVector(
+            (name, regex.NULL) for name, expr in state)
+    else:
+        return regex.NULL
+
+
 def Nullable(state):
-    if isinstance(state, ExpressionVector):
+    if isinstance(state, regex.ExpressionVector):
         return [name for name, expr in state if Nullable(expr)]
     else:
         nu = Nu(state)
@@ -210,7 +209,7 @@ def construct(expr):
         transitions[number].sort()
 
     accepts = [Nullable(state) for state in states]
-    error = states[expr.NullValue()]
+    error = states[NullValue(expr)]
     return Automaton(transitions, accepts, error)
 
 

@@ -6,6 +6,7 @@ import time
 
 from . import dfa
 from . import parse
+from . import regex
 from . import util
 
 
@@ -36,7 +37,7 @@ def main(argv):
 
     name = 'main'
     # Singleton
-    vector = dfa.ExpressionVector([(name, expr)])
+    vector = regex.ExpressionVector([(name, expr)])
     #log(vector)
 
     automaton = dfa.construct(vector)

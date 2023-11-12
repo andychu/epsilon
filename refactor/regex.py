@@ -28,6 +28,12 @@ codespace = util.IntegerSet(cs)
 #unicode = type("Regex", (object, ), locals())
 
 
+class ExpressionVector(tuple):
+
+    def __new__(cls, iterable):
+        return super().__new__(cls, iterable)
+
+
 @functools.total_ordering
 class Expression:
 
@@ -42,9 +48,6 @@ class Expression:
 
     def __repr__(self):
         return "<{}>".format(str(self))
-
-    def NullValue(self):
-        return NULL
 
 
 class SymbolSet(Expression):
