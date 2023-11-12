@@ -76,6 +76,7 @@ class Epsilon(Expression):
 
 
 class KleeneClosure(Expression):
+    _expr: Expression
 
     def __new__(cls, expr):
         if isinstance(expr, KleeneClosure):
@@ -97,6 +98,7 @@ class KleeneClosure(Expression):
 
 
 class Complement(Expression):
+    _expr: Expression
 
     def __new__(cls, expr):
         if isinstance(expr, Complement):
@@ -116,6 +118,8 @@ class Complement(Expression):
 
 
 class Concatenation(Expression):
+    _left: Expression
+    _right: Expression
 
     def __new__(cls, left, right):
         if isinstance(left, Concatenation):
@@ -144,6 +148,8 @@ class Concatenation(Expression):
 
 
 class LogicalOr(Expression):
+    _left: Expression
+    _right: Expression
 
     def __new__(cls, left, right):
         if isinstance(left, SymbolSet) and isinstance(right, SymbolSet):
@@ -184,6 +190,8 @@ class LogicalOr(Expression):
 
 
 class LogicalAnd(Expression):
+    _left: Expression
+    _right: Expression
 
     def __new__(cls, left, right):
         terms = set()

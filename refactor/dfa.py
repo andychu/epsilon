@@ -21,7 +21,7 @@ import time
 from . import regex
 from . import util
 
-from typing import Dict, List, Tuple, Any, Optional
+from typing import Set, Dict, List, Tuple, Any, Optional, Union
 
 log = util.log
 
@@ -54,7 +54,7 @@ def ProductIntersect(a: util.IntegerSet, b: util.IntegerSet):
         left.intersection(right) for left, right in itertools.product(a, b))
 
 
-def DerivClasses(state):
+def DerivClasses(state: regex.Expression):
     #log('state %s', state)
     if isinstance(state, regex.RegularVector):
         classes = (DerivClasses(expr) for _, expr in state)
@@ -101,7 +101,7 @@ def DerivClasses(state):
         #return state.derivative_classes()
 
 
-def Derivative(state, symbol):
+def Derivative(state: regex.Expression, symbol: str):
     #log('state %s', state)
     if isinstance(state, regex.RegularVector):
         return regex.RegularVector(
@@ -137,7 +137,7 @@ def Derivative(state, symbol):
         raise AssertionError(state)
 
 
-def Nullable(state):
+def Nullable(state: regex.Expression):
     if isinstance(state, regex.RegularVector):
         return [name for name, expr in state if Nullable(expr)]
     else:
@@ -146,7 +146,7 @@ def Nullable(state):
         return nu == regex.EPSILON
 
 
-def Nu(state):
+def Nu(state: regex.Expression):
     if isinstance(state, regex.Epsilon):
         return state
 
@@ -157,7 +157,6 @@ def Nu(state):
         return regex.EPSILON
 
     elif isinstance(state, regex.Complement):
-        return regex.Complement(Derivative(state._expr, symbol))
         nu = Nu(state._expr)
         assert nu == regex.EPSILON or nu == regex.NULL
         return regex.NULL if nu == regex.EPSILON else regex.EPSILON

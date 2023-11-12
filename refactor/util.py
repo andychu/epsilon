@@ -26,6 +26,24 @@ def log(msg, *args):
     print(msg, file=sys.stderr)
 
 
+def canonical(iterable):
+    # turn into pairs
+    g = ((x, x) if isinstance(x, int) else x for x in iterable)
+
+    # Hm why do we need to remove these?
+    ranges = sorted((s, e) for (s, e) in g if s <= e)
+
+    if ranges:
+        r = ranges[0]
+        for s in ranges[1:]:
+            if s[0] > r[1] + 1:
+                yield r
+                r = s
+            else:
+                r = (r[0], max(r[1], s[1]))
+        yield r
+
+
 class IntegerSet(tuple):
     """An immutable set of integers, represented as sorted tuple of disjoint,
     non-contiguous ranges.
@@ -41,21 +59,6 @@ class IntegerSet(tuple):
         A bare integer, x, represents the range (x, x).
         """
 
-        def canonical(iterable):
-            ranges = sorted(
-                filter(lambda r: r[0] <= r[1],
-                       ((x, x) if isinstance(x, int) else
-                        (int(x[0]), int(x[1])) for x in iterable)))
-            if ranges:
-                r = ranges[0]
-                for s in ranges[1:]:
-                    if s[0] > r[1] + 1:
-                        yield r
-                        r = s
-                    else:
-                        r = (r[0], max(r[1], s[1]))
-                yield r
-
         if isinstance(iterable, cls):
             self = super().__new__(cls, iterable)
         else:
@@ -69,8 +72,8 @@ class IntegerSet(tuple):
         :return: True if the integer is a member of the set.
         """
         i = bisect.bisect(self, (x, ))
-        return (i < len(self) and x == self[i][0])\
-                or (i > 0 and self[i-1][0] <= x <= self[i-1][1])
+        return ((i < len(self) and x == self[i][0]) or
+                (i > 0 and self[i - 1][0] <= x <= self[i - 1][1]))
 
     # Only used in unit tests
     def cardinality(self):

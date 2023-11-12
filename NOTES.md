@@ -31,6 +31,11 @@ cli.py has this parser:
   - ExpressionVector might become separate
   - canonicalization seems like an issue
 
+  - IntegerSet is tuple
+  - RegularVector is tuple
+
+  - I kinda want to be Expression with values
+
 ### Testing
 
 - Testing:
