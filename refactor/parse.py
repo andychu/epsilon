@@ -194,7 +194,7 @@ class Parser:
         c = buffer.read()
         while c == '|':
             right = self._parse_logical_and(buffer)
-            expr = regex.LogicalOr(expr, right)
+            expr = regex.Or(expr, right)
             c = buffer.read()
         else:
             buffer.push(c)
@@ -205,7 +205,7 @@ class Parser:
         c = buffer.read()
         while c == '&':
             right = self._parse_complement(buffer)
-            expr = regex.LogicalAnd(expr, right)
+            expr = regex.And(expr, right)
             c = buffer.read()
         else:
             buffer.push(c)
@@ -219,7 +219,7 @@ class Parser:
         else:
             buffer.push(c)
         expr = self._parse_concatenation(buffer)
-        return regex.Complement(expr) if complement else expr
+        return regex.Not(expr) if complement else expr
 
     def _parse_concatenation(self, buffer):
         expr = regex.Epsilon()
@@ -228,29 +228,28 @@ class Parser:
             right = self._parse_quantification(buffer)
             if length == len(buffer):
                 break
-            expr = regex.Concatenation(expr, right)
+            expr = regex.Cat(expr, right)
         return expr
 
     def _parse_quantification(self, buffer):
         expr = self._parse_element(buffer)
         c = buffer.read()
         if c == "?":
-            expr = regex.LogicalOr(expr, regex.Epsilon())
+            expr = regex.Or(expr, regex.Epsilon())
         elif c == "*":
-            expr = regex.KleeneClosure(expr)
+            expr = regex.Star(expr)
         elif c == "+":
-            expr = regex.Concatenation(expr, regex.KleeneClosure(expr))
+            expr = regex.Cat(expr, regex.Star(expr))
         elif c == "{":
             mincount, maxcount = self._parse_count(buffer)
-            expr = functools.reduce(lambda x, y: regex.Concatenation(x, y),
+            expr = functools.reduce(lambda x, y: regex.Cat(x, y),
                                     itertools.repeat(expr, mincount),
                                     regex.Epsilon())
             if maxcount is None:
-                expr = regex.Concatenation(expr, regex.KleeneClosure(expr))
+                expr = regex.Cat(expr, regex.Star(expr))
             else:
                 expr = functools.reduce(
-                    lambda x, y: regex.Concatenation(
-                        x, regex.LogicalOr(expr, regex.Epsilon())),
+                    lambda x, y: regex.Cat(x, regex.Or(expr, regex.Epsilon())),
                     itertools.repeat(expr, maxcount - mincount), expr)
         else:
             buffer.push(c)

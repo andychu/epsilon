@@ -82,7 +82,7 @@ def main(argv):
         elapsed = time.time() - start_time
         log('\t%.5f Parsed', elapsed)
 
-        #log(expr)
+        log(expr)
 
         name = 'main'
         # Singleton

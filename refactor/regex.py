@@ -75,15 +75,15 @@ class Epsilon(Expression):
         return self.__class__.__name__,
 
 
-class KleeneClosure(Expression):
+class Star(Expression):
     _expr: Expression
 
     def __new__(cls, expr):
-        if isinstance(expr, KleeneClosure):
+        if isinstance(expr, Star):
             return expr
         elif expr == EPSILON:
             return expr
-        elif expr == NULL:
+        elif expr == EMPTY_SET:
             return EPSILON
 
         self = super().__new__(cls)
@@ -97,11 +97,11 @@ class KleeneClosure(Expression):
         return self.__class__.__name__, self._expr
 
 
-class Complement(Expression):
+class Not(Expression):
     _expr: Expression
 
     def __new__(cls, expr):
-        if isinstance(expr, Complement):
+        if isinstance(expr, Not):
             return expr._expr
         elif isinstance(expr, SymbolSet):
             return SymbolSet(codespace.difference(expr._codepoints))
@@ -117,17 +117,17 @@ class Complement(Expression):
         return self.__class__.__name__, self._expr
 
 
-class Concatenation(Expression):
+class Cat(Expression):
     _left: Expression
     _right: Expression
 
     def __new__(cls, left, right):
-        if isinstance(left, Concatenation):
-            left, right = left._left, Concatenation(left._right, right)
+        if isinstance(left, Cat):
+            left, right = left._left, Cat(left._right, right)
 
-        if left == NULL:
+        if left == EMPTY_SET:
             return left
-        elif right == NULL:
+        elif right == EMPTY_SET:
             return right
         elif left == EPSILON:
             return right
@@ -147,7 +147,7 @@ class Concatenation(Expression):
         return self.__class__.__name__, self._left, self._right
 
 
-class LogicalOr(Expression):
+class Or(Expression):
     _left: Expression
     _right: Expression
 
@@ -162,7 +162,7 @@ class LogicalOr(Expression):
             if isinstance(expr, cls):
                 stack.append(expr._left)
                 stack.append(expr._right)
-            elif expr == NULL:
+            elif expr == EMPTY_SET:
                 pass
             elif expr == SIGMA:
                 return expr
@@ -170,7 +170,7 @@ class LogicalOr(Expression):
                 terms.add(expr)
 
         if not terms:
-            return NULL
+            return EMPTY_SET
 
         new = super().__new__
 
@@ -189,7 +189,7 @@ class LogicalOr(Expression):
         return self.__class__.__name__, self._left, self._right
 
 
-class LogicalAnd(Expression):
+class And(Expression):
     _left: Expression
     _right: Expression
 
@@ -201,7 +201,7 @@ class LogicalAnd(Expression):
             if isinstance(expr, cls):
                 stack.append(expr._left)
                 stack.append(expr._right)
-            elif expr == NULL:
+            elif expr == EMPTY_SET:
                 return expr
             elif expr == SIGMA:
                 pass
@@ -230,6 +230,6 @@ class LogicalAnd(Expression):
 
 EPSILON = Epsilon()
 SIGMA = SymbolSet(codespace)
-NULL = SymbolSet()
+EMPTY_SET = SymbolSet()
 
 # vim: sw=4

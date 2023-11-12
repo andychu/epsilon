@@ -69,13 +69,13 @@ def DerivClasses(state: regex.Expression):
             regex.codespace.difference(state._codepoints)
         }
 
-    elif isinstance(state, regex.KleeneClosure):
+    elif isinstance(state, regex.Star):
         return DerivClasses(state._expr)
 
-    elif isinstance(state, regex.Complement):
+    elif isinstance(state, regex.Not):
         return DerivClasses(state._expr)
 
-    elif isinstance(state, regex.Concatenation):
+    elif isinstance(state, regex.Cat):
         if Nullable(state._left):
             return filter(
                 None,
@@ -84,13 +84,13 @@ def DerivClasses(state: regex.Expression):
         else:
             return DerivClasses(state._left)
 
-    elif isinstance(state, regex.LogicalOr):
+    elif isinstance(state, regex.Or):
         return filter(
             None,
             ProductIntersect(DerivClasses(state._left),
                              DerivClasses(state._right)))
 
-    elif isinstance(state, regex.LogicalAnd):
+    elif isinstance(state, regex.And):
         return filter(
             None,
             ProductIntersect(DerivClasses(state._left),
@@ -108,30 +108,30 @@ def Derivative(state: regex.Expression, symbol: str):
             (name, Derivative(expr, symbol)) for name, expr in state)
 
     elif isinstance(state, regex.Epsilon):
-        return regex.NULL
+        return regex.EMPTY_SET
 
     elif isinstance(state, regex.SymbolSet):
-        return regex.EPSILON if state._codepoints.has(symbol) else regex.NULL
+        return (regex.EPSILON
+                if state._codepoints.has(symbol) else regex.EMPTY_SET)
 
-    elif isinstance(state, regex.KleeneClosure):
-        return regex.Concatenation(Derivative(state._expr, symbol), state)
+    elif isinstance(state, regex.Star):
+        return regex.Cat(Derivative(state._expr, symbol), state)
 
-    elif isinstance(state, regex.Complement):
-        return regex.Complement(Derivative(state._expr, symbol))
+    elif isinstance(state, regex.Not):
+        return regex.Not(Derivative(state._expr, symbol))
 
-    elif isinstance(state, regex.Concatenation):
-        return regex.LogicalOr(
-            regex.Concatenation(Derivative(state._left, symbol), state._right),
-            regex.Concatenation(Nu(state._left),
-                                Derivative(state._right, symbol)))
+    elif isinstance(state, regex.Cat):
+        return regex.Or(
+            regex.Cat(Derivative(state._left, symbol), state._right),
+            regex.Cat(Nu(state._left), Derivative(state._right, symbol)))
 
-    elif isinstance(state, regex.LogicalOr):
-        return regex.LogicalOr(Derivative(state._left, symbol),
-                               Derivative(state._right, symbol))
+    elif isinstance(state, regex.Or):
+        return regex.Or(Derivative(state._left, symbol),
+                        Derivative(state._right, symbol))
 
-    elif isinstance(state, regex.LogicalAnd):
-        return regex.LogicalAnd(Derivative(state._left, symbol),
-                                Derivative(state._right, symbol))
+    elif isinstance(state, regex.And):
+        return regex.And(Derivative(state._left, symbol),
+                         Derivative(state._right, symbol))
 
     else:
         raise AssertionError(state)
@@ -142,7 +142,7 @@ def Nullable(state: regex.Expression):
         return [name for name, expr in state if Nullable(expr)]
     else:
         nu = Nu(state)
-        assert nu == regex.EPSILON or nu == regex.NULL
+        assert nu == regex.EPSILON or nu == regex.EMPTY_SET
         return nu == regex.EPSILON
 
 
@@ -151,24 +151,24 @@ def Nu(state: regex.Expression):
         return state
 
     elif isinstance(state, regex.SymbolSet):
-        return regex.NULL
+        return regex.EMPTY_SET
 
-    elif isinstance(state, regex.KleeneClosure):
+    elif isinstance(state, regex.Star):
         return regex.EPSILON
 
-    elif isinstance(state, regex.Complement):
+    elif isinstance(state, regex.Not):
         nu = Nu(state._expr)
-        assert nu == regex.EPSILON or nu == regex.NULL
-        return regex.NULL if nu == regex.EPSILON else regex.EPSILON
+        assert nu == regex.EPSILON or nu == regex.EMPTY_SET
+        return regex.EMPTY_SET if nu == regex.EPSILON else regex.EPSILON
 
-    elif isinstance(state, regex.Concatenation):
-        return regex.LogicalAnd(Nu(state._left), Nu(state._right))
+    elif isinstance(state, regex.Cat):
+        return regex.And(Nu(state._left), Nu(state._right))
 
-    elif isinstance(state, regex.LogicalOr):
-        return regex.LogicalOr(Nu(state._left), Nu(state._right))
+    elif isinstance(state, regex.Or):
+        return regex.Or(Nu(state._left), Nu(state._right))
 
-    elif isinstance(state, regex.LogicalAnd):
-        return regex.LogicalAnd(Nu(state._left), Nu(state._right))
+    elif isinstance(state, regex.And):
+        return regex.And(Nu(state._left), Nu(state._right))
 
     else:
         raise AssertionError(state)
@@ -194,11 +194,25 @@ def construct(expr: Any) -> Automaton:
         number = states[state]
 
         # a?a has 4 states.  Linear in the size of the pattern
-        log('number = %d', number)
+        #log('%d. %s', number, state)
+
+        state_elapsed = time.time() - start_time
 
         for deriv_class in DerivClasses(state):
             symbol = deriv_class[0][0]
+
+            s = time.time()
             nextstate = Derivative(state, symbol)
+            deriv_elapsed = time.time() - s
+
+            # Derivative() blows up with a? ^ n + a ^ n
+            # a?a becomes Cat( Or(SymbolSet('a') | Epsilon()) SymbolSet('a'))
+
+            if 0:
+                if deriv_elapsed > 0.01:
+                    util.log('Deriv took %.5f ms', deriv_elapsed * 1000)
+                    util.log('symbol = %s, state = %s', symbol, state)
+
             if nextstate not in states:
                 states[nextstate] = len(states)
                 transitions.append([])
@@ -208,11 +222,12 @@ def construct(expr: Any) -> Automaton:
             for first, last in deriv_class:
                 transitions[number].append((first, last, nextnumber))
 
-                i += 1
-                if i % 5 == 0:
-                    #elapsed = time.time() - start_time
-                    #util.log('%d iterations in %.5f seconds', i, elapsed)
-                    pass
+            i += 1
+            if i % 1 == 0:
+                d_elapsed = time.time() - start_time
+                util.log('%d iterations in %.5f seconds - %.5f', i, d_elapsed,
+                         state_elapsed)
+                pass
 
         transitions[number].sort()
 
@@ -222,7 +237,7 @@ def construct(expr: Any) -> Automaton:
 
     # Null value for "regular vector" from paper
     null_value = regex.RegularVector(
-        (name, regex.NULL) for name, expr in state)
+        (name, regex.EMPTY_SET) for name, expr in state)
 
     # Should this be called "error" or something else?
     error_num = states[null_value]

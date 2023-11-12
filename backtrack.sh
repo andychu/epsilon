@@ -65,6 +65,9 @@ compare() {
   echo "text $text"
   time $impl-match "$pat" "$text"
 
+  # Just run one
+  return
+
   # Perl doesn't backtrack here
   echo
   echo "text ${text}z"
