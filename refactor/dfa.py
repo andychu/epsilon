@@ -15,16 +15,22 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import bisect
-import collections
+from dataclasses import dataclass
 import itertools
 import time
 from . import regex
 from . import util
 
+from typing import Dict, List, Tuple, Any, Optional
+
 log = util.log
 
-Automaton = collections.namedtuple("Automaton",
-                                   ["transitions", "accepts", "error"])
+
+@dataclass
+class Automaton:
+    transitions: List[List[Tuple[int, int, int]]]
+    accepts: List[List[str]]
+    error: int
 
 
 def product_intersections(sets):
@@ -37,7 +43,7 @@ def product_intersections(sets):
     return set(x[0].intersection(*x[1:]) for x in itertools.product(*sets))
 
 
-def ProductIntersect(a, b):
+def ProductIntersect(a: util.IntegerSet, b: util.IntegerSet):
     return set(
         left.intersection(right) for left, right in itertools.product(a, b))
 
@@ -171,14 +177,14 @@ def Nu(state):
         raise AssertionError(state)
 
 
-def construct(expr):
+def construct(expr: Any) -> Automaton:
     """Construct an automaton from a regular expression.
 
     :param expr: a regular expression or a ExpressionVector.
     :return: 
     """
-    states = {expr: 0}
-    transitions = [[]]
+    states: Dict[Any, int] = {expr: 0}
+    transitions: List[List[Tuple[int, int, int]]] = [[]]  
 
     start_time = time.time()
     i = 0
@@ -225,8 +231,8 @@ class NoMatchError(Exception):
         super().__init__(msg)
 
 
-def scan(automaton, atoms):
-    buffer = []
+def scan(automaton: Automaton, atoms):
+    buffer: List[str] = []  # Optional because of None
     offset = 0
 
     state = 0
@@ -244,7 +250,7 @@ def scan(automaton, atoms):
         if offset < len(buffer):
             atom = buffer[offset]
         else:
-            atom = next(atoms, None)
+            atom = next(atoms, None)  # type: ignore
             if atom is not None:
                 buffer.append(atom)
 

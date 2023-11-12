@@ -150,6 +150,8 @@ def main(argv):
                 for token in tokens)
             automaton = dfa.construct(vector)
 
+            log('automaton %s', automaton)
+
             s = sys.stdin.read()
             try:
                 for token, match in dfa.scan(automaton, iter(s)):
