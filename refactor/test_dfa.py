@@ -30,10 +30,18 @@ class TestDfa(unittest.TestCase):
             print(token, repr(match))
 
     def testBacktracking(self):
-        n = 32
+        n = 40
         #n = 2
 
-        pat = 'a?' * n + 'a' * n
+        # Original rsc test case
+        #pat = 'a?' * n + 'a' * n
+
+        # This doesn't repro the bug
+        #pat = 'a' * n
+
+        # Enough to repro the bug
+        pat = 'a?' * n
+
         log('PAT %s', pat)
 
         parser = parse.Parser()
@@ -46,8 +54,11 @@ class TestDfa(unittest.TestCase):
         #print(vector)
 
         start_time = time.time()
+
+        # This can blow up even more
         #automaton = dfa.construct(vector)
 
+        # This also blows up
         d = dfa.Derivative(expr, ord('a'))
 
         log('DERIV %s', d)

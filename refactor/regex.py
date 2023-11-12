@@ -122,8 +122,32 @@ class Cat(Expression):
     _right: Expression
 
     def __new__(cls, left, right):
-        if isinstance(left, Cat):
-            left, right = left._left, Cat(left._right, right)
+        # This causes a blowup!!!
+        # One test in test_parse.py fails, but it might not be essential
+
+        # Hm there is a LESSER blowup even if we turn this off.  The
+        # test_dfa.py example doesn't fully capture the a?a?a?...aaa... example
+        # from Cox.  Other parts may blow up.
+
+        if 1:
+            # Section 4.1 of Owens et. al.: "Weaker notions of RE equivalence"
+            #
+            # "Only introduce a new state when no equivalent state is present"
+            # "Brzozowski proved that this check for state equivalence
+            # guarantees the minimality of the DFA, but it's expensive (??)
+            #
+            # In practice we change it to
+            #
+            # (a . b) . c  -> a . (b . c)
+
+            if isinstance(left, Cat):
+                left, right = left._left, Cat(left._right, right)
+
+        # Let's try this other way?
+        # Oh something else blows up, even if we don't do this
+        if 0:
+            if isinstance(right, Cat):
+                left, right = Cat(left, right._left), right._right
 
         if left == EMPTY_SET:
             return left
