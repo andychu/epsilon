@@ -225,7 +225,7 @@ class NoMatchError(Exception):
         super().__init__(msg)
 
 
-def scan(automaton, iterable, tosymbol=ord, pack=lambda atoms: "".join(atoms)):
+def scan(automaton, iterable):
     buffer, offset = [], 0
     state, accept, length = 0, False, 0
     atoms = iterable
@@ -246,7 +246,7 @@ def scan(automaton, iterable, tosymbol=ord, pack=lambda atoms: "".join(atoms)):
                 buffer.append(atom)
 
         if atom is not None:
-            symbol = tosymbol(atom)
+            symbol = ord(atom)
             transitions = automaton.transitions[state]
 
             # This is similar to util.IntegerSet.has(), but doesn't call it?
@@ -264,11 +264,15 @@ def scan(automaton, iterable, tosymbol=ord, pack=lambda atoms: "".join(atoms)):
 
         if state == automaton.error:
             if accept:
-                yield accept[0], pack(buffer[:length])
+                yield accept[0], ''.join(buffer[:length])
                 buffer, offset = buffer[length:], 0
                 state, accept, length = 0, False, 0
 
-                # ANDY FIX: Prevents infinite loop
+                # TODO:
+                # - Prevents infinite loop for empty string
+                # - But breaks the lexing style?
+                # - I guess the problem is we need TWO different modes!
+                #   - grep and lex
                 break
             elif buffer:
                 raise NoMatchError(buffer)

@@ -72,27 +72,32 @@ class IntegerSet(tuple):
         return (i < len(self) and x == self[i][0])\
                 or (i > 0 and self[i-1][0] <= x <= self[i-1][1])
 
+    # Only used in unit tests
     def cardinality(self):
         """Return the number of integers in the set."""
         return functools.reduce(lambda l, r: l + r[1] - r[0] + 1, self, 0)
 
-    def isdisjoint(self, other):
-        """Return True if the set has no integers in common with other."""
-        return not self.intersection(other)
+    if 0:
 
-    def issubset(self, other):
-        """Test whether every integer in the set is in other."""
-        if not isinstance(other, self.__class__):
-            other = self.__class__(other)
+        def isdisjoint(self, other):
+            """Return True if the set has no integers in common with other."""
+            return not self.intersection(other)
 
-        i = iter(other)
-        r = next(i, None)
-        for s in self:
-            while r and r[1] < s[0]:
-                r = next(i, None)
-            if not r or s[0] < r[0] or s[1] > r[1]:
-                return False
-        return True
+    if 0:
+
+        def issubset(self, other):
+            """Test whether every integer in the set is in other."""
+            if not isinstance(other, self.__class__):
+                other = self.__class__(other)
+
+            i = iter(other)
+            r = next(i, None)
+            for s in self:
+                while r and r[1] < s[0]:
+                    r = next(i, None)
+                if not r or s[0] < r[0] or s[1] > r[1]:
+                    return False
+            return True
 
     def issuperset(self, other):
         """Test whether every integer in other is in the set."""
@@ -162,10 +167,12 @@ class IntegerSet(tuple):
             difference = self.__class__(ranges)
         return difference
 
-    def symmetric_difference(self, other):
-        """Return a new set with integers in either the set or other,
-        but not both.
-        """
-        if not isinstance(other, self.__class__):
-            other = self.__class__(other)
-        return self.difference(other).union(other.difference(self))
+    if 0:
+
+        def symmetric_difference(self, other):
+            """Return a new set with integers in either the set or other,
+            but not both.
+            """
+            if not isinstance(other, self.__class__):
+                other = self.__class__(other)
+            return self.difference(other).union(other.difference(self))

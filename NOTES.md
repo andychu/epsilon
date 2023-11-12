@@ -23,9 +23,14 @@ cli.py has this parser:
 
 ## TODO
 
-- Prune and Refactor
-  - delete unicode?
-  - delete `target_python`
+- Figure out why a?a?a?aaa is blowing up
+- Write test harness / unit tests for ExpressionVector
+  - do a JSON lexer I guess
+- Add static typing
+  - ExpressionVector might become separate
+
+
+### Testing
 
 - Testing:
   - ./run.sh nfa-suite
@@ -42,6 +47,7 @@ cli.py has this parser:
 - Make a command line interface that's compatible with rsc-regexp
 - Do the performance test for a?a?a?aaaa
   - compilation is very slow!
+- Prune unused code and Refactor into functional style
 
 ## Understanding
 

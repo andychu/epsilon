@@ -93,6 +93,7 @@ tox-tests() {
 unit-tests() {
   python3 -m refactor.test_util "$@"
   python3 -m refactor.test_parse "$@"
+  python3 -m refactor.test_dfa "$@"
   # TestIntegerSet.test_prod
 }
 

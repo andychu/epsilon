@@ -56,8 +56,13 @@ def main(argv):
     #print(list(text))
 
     # Must be an iterator
+
     text = iter(s)
-    #log(text)
+
+    # TODO:  need two modes
+    # - anchored match
+    # - findall() for lexer
+    # - add tests to catch unanchored
 
     try:
         for token, match in dfa.scan(automaton, text):
