@@ -64,9 +64,6 @@ class SymbolSet(Expression):
     def codepoints(self):
         return self._codepoints
 
-    def nu(self):
-        return NULL
-
 
 class Epsilon(Expression):
 
@@ -75,9 +72,6 @@ class Epsilon(Expression):
 
     def _orderby(self):
         return self.__class__.__name__,
-
-    def nu(self):
-        return self
 
 
 class KleeneClosure(Expression):
@@ -99,9 +93,6 @@ class KleeneClosure(Expression):
 
     def _orderby(self):
         return self.__class__.__name__, self._expr
-
-    def nu(self):
-        return EPSILON
 
 
 class Complement(Expression):
@@ -155,9 +146,6 @@ class Concatenation(Expression):
     def _orderby(self):
         return self.__class__.__name__, self._left, self._right
 
-    def nu(self):
-        return LogicalAnd(self._left.nu(), self._right.nu())
-
 
 class LogicalOr(Expression):
 
@@ -198,9 +186,6 @@ class LogicalOr(Expression):
     def _orderby(self):
         return self.__class__.__name__, self._left, self._right
 
-    def nu(self):
-        return LogicalOr(self._left.nu(), self._right.nu())
-
 
 class LogicalAnd(Expression):
 
@@ -237,9 +222,6 @@ class LogicalAnd(Expression):
 
     def _orderby(self):
         return self.__class__.__name__, self._left, self._right
-
-    def nu(self):
-        return LogicalAnd(self._left.nu(), self._right.nu())
 
 
 EPSILON = Epsilon()

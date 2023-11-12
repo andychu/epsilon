@@ -114,17 +114,16 @@ def Derivative(state, symbol):
     elif isinstance(state, regex.Concatenation):
         return regex.LogicalOr(
             regex.Concatenation(Derivative(state._left, symbol), state._right),
-            regex.Concatenation(state._left.nu(), Derivative(state._right, symbol)))
+            regex.Concatenation(Nu(state._left),
+                                Derivative(state._right, symbol)))
 
     elif isinstance(state, regex.LogicalOr):
-        return regex.LogicalOr(
-                Derivative(state._left, symbol),
-                Derivative(state._right, symbol))
+        return regex.LogicalOr(Derivative(state._left, symbol),
+                               Derivative(state._right, symbol))
 
     elif isinstance(state, regex.LogicalAnd):
-        return regex.LogicalAnd(
-                Derivative(state._left, symbol),
-                Derivative(state._right, symbol))
+        return regex.LogicalAnd(Derivative(state._left, symbol),
+                                Derivative(state._right, symbol))
 
     else:
         raise AssertionError(state)
@@ -134,9 +133,38 @@ def Nullable(state):
     if isinstance(state, ExpressionVector):
         return [name for name, expr in state if Nullable(expr)]
     else:
-        nu = state.nu()
+        nu = Nu(state)
         assert nu == regex.EPSILON or nu == regex.NULL
         return nu == regex.EPSILON
+
+
+def Nu(state):
+    if isinstance(state, regex.Epsilon):
+        return state
+
+    elif isinstance(state, regex.SymbolSet):
+        return regex.NULL
+
+    elif isinstance(state, regex.KleeneClosure):
+        return regex.EPSILON
+
+    elif isinstance(state, regex.Complement):
+        return regex.Complement(Derivative(state._expr, symbol))
+        nu = Nu(state._expr)
+        assert nu == regex.EPSILON or nu == regex.NULL
+        return regex.NULL if nu == regex.EPSILON else regex.EPSILON
+
+    elif isinstance(state, regex.Concatenation):
+        return regex.LogicalAnd(Nu(state._left), Nu(state._right))
+
+    elif isinstance(state, regex.LogicalOr):
+        return regex.LogicalOr(Nu(state._left), Nu(state._right))
+
+    elif isinstance(state, regex.LogicalAnd):
+        return regex.LogicalAnd(Nu(state._left), Nu(state._right))
+
+    else:
+        raise AssertionError(state)
 
 
 def construct(expr):
