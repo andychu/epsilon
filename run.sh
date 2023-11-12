@@ -161,7 +161,7 @@ test-tool-match() {
 }
 
 test-tool-lex() {
-  cat README.md | tool lex
+  echo '"hi" "escaped\n"' | tool lex examples/string.epsilon
 }
 
 test-tool() {

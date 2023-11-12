@@ -267,13 +267,6 @@ def scan(automaton, iterable):
                 yield accept[0], ''.join(buffer[:length])
                 buffer, offset = buffer[length:], 0
                 state, accept, length = 0, False, 0
-
-                # TODO:
-                # - Prevents infinite loop for empty string
-                # - But breaks the lexing style?
-                # - I guess the problem is we need TWO different modes!
-                #   - grep and lex
-                break
             elif buffer:
                 raise NoMatchError(buffer)
             else:

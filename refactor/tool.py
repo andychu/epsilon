@@ -1,6 +1,8 @@
 # Alternative to cli.py that matches our test interface
 
+import configparser
 import os
+import re
 import sys
 import time
 
@@ -13,6 +15,50 @@ from . import util
 def log(msg, *args):
     if 1:
         util.log(msg, *args)
+
+
+class _Interpolation(configparser.Interpolation):
+    _re_braces = re.compile(r"(\{[^}]*})"
+                            r"|\\\{"
+                            r"|\{[0-9]+(,[0-9]*)}"
+                            r"|\\[opPx]\{[^}]*}")
+
+    def before_get(self, parser, section, option, value, defaults):
+        return self._interpolate(parser, section, option, value, set())
+
+    def _interpolate(self, parser, section, option, value, seen):
+        fragments = []
+        offset = 0
+        while offset < len(value):
+            match = self._re_braces.search(value, offset)
+            if match:
+                start, end = match.span()
+                if match.group(1):
+                    name = value[start + 1:end - 1]
+                    if name in seen:
+                        raise configparser.InterpolationError(
+                            name, section,
+                            "{}: interpolation loop detected".format(name))
+                    interpolated = parser.get(section,
+                                              name,
+                                              raw=True,
+                                              fallback=None)
+                    if interpolated is None:
+                        raise configparser.InterpolationMissingOptionError(
+                            option, section, value, name)
+                    fragments.append(value[offset:start])
+                    fragments.append(
+                        self._interpolate(parser, section, name, interpolated,
+                                          seen.union({name})))
+                    offset = end
+                else:
+                    fragments.append(value[offset:end])
+                    offset = end
+            else:
+                fragments.append(value[offset:])
+                break
+
+        return "".join(fragments)
 
 
 def main(argv):
@@ -71,17 +117,45 @@ def main(argv):
             for token, match in dfa.scan(automaton, text):
                 #print(token, repr(match))
                 print(match)
+                # Print one match
+                break
         except dfa.NoMatchError:
             print('NOPE')
 
         log('\t%.5f Matched', elapsed)
 
     elif action == 'lex':
-        s = sys.stdin.read()
 
-        # Take a file?
-        # Or we can just have a list of (name, action)
-        print('TODO')
+        config = configparser.ConfigParser(interpolation=_Interpolation())
+        config.optionxform = str
+        with open(argv[2]) as f:
+            config.read_file(f)
+
+        for name in config.sections():  # Should only be one section
+            section = config[name]
+            parser = parse.Parser()
+            tokens = tuple(key for key in section if not key.startswith("_"))
+            assert len(tokens) > 0
+            if 0:
+                for token in tokens:
+                    pat = section[token]
+                    parsed = parser.parse(pat.replace('\n', ''))
+
+                    print('T', token)
+                    print('PAT', pat)
+                    print('PARSED', parsed)
+
+            vector = regex.ExpressionVector(
+                (token, parser.parse(section[token].replace("\n", "")))
+                for token in tokens)
+            automaton = dfa.construct(vector)
+
+            s = sys.stdin.read()
+            try:
+                for token, match in dfa.scan(automaton, iter(s)):
+                    print(token, repr(match))
+            except dfa.NoMatchError:
+                print('NOPE')
 
     else:
         raise RuntimeError('Invalid action %r' % action)
