@@ -21,7 +21,7 @@ repeat() {
 
 epsilon-match() {
   #python3 -m epsilon.tool "$@"
-  python3 -m refactor.tool "$@"
+  python3 -m refactor.tool match "$@"
 }
 
 pynfa-match() {

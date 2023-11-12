@@ -16,62 +16,75 @@ def log(msg, *args):
 
 
 def main(argv):
-    pat = argv[1]
-    s = argv[2]
+    action = argv[1]
 
-    start_time = time.time()
+    if action == 'match':
+        pat = argv[2]
+        s = argv[3]
 
-    parser = parse.Parser()
+        start_time = time.time()
 
-    try:
-        expr = parser.parse(pat)
-    except parse.SyntaxError as e:
-        #print(e)
-        print('bad regexp')  # the common protocol
-        return
+        parser = parse.Parser()
 
-    elapsed = time.time() - start_time
-    log('\t%.5f Parsed', elapsed)
+        try:
+            expr = parser.parse(pat)
+        except parse.SyntaxError as e:
+            #print(e)
+            print('bad regexp')  # the common protocol
+            return
 
-    #log(expr)
+        elapsed = time.time() - start_time
+        log('\t%.5f Parsed', elapsed)
 
-    name = 'main'
-    # Singleton
-    vector = regex.ExpressionVector([(name, expr)])
-    #log(vector)
+        #log(expr)
 
-    automaton = dfa.construct(vector)
+        name = 'main'
+        # Singleton
+        vector = regex.ExpressionVector([(name, expr)])
+        #log(vector)
 
-    elapsed = time.time() - start_time
-    log('\t%.5f DFA', elapsed)
+        automaton = dfa.construct(vector)
 
-    #log(automaton)
-    #log('')
-    #log('A0 %s', automaton[0])
+        elapsed = time.time() - start_time
+        log('\t%.5f DFA', elapsed)
 
-    #target = target_execute.Target(s)
-    #target.emit_automaton(name, automaton)
+        #log(automaton)
+        #log('')
+        #log('A0 %s', automaton[0])
 
-    #text = (c for line in sys.stdin for c in line)
-    #print(list(text))
+        #target = target_execute.Target(s)
+        #target.emit_automaton(name, automaton)
 
-    # Must be an iterator
+        #text = (c for line in sys.stdin for c in line)
+        #print(list(text))
 
-    text = iter(s)
+        # Must be an iterator
 
-    # TODO:  need two modes
-    # - anchored match
-    # - findall() for lexer
-    # - add tests to catch unanchored
+        text = iter(s)
 
-    try:
-        for token, match in dfa.scan(automaton, text):
-            #print(token, repr(match))
-            print(match)
-    except dfa.NoMatchError:
-        print('NOPE')
+        # TODO:  need two modes
+        # - anchored match
+        # - findall() for lexer
+        # - add tests to catch unanchored
 
-    log('\t%.5f Matched', elapsed)
+        try:
+            for token, match in dfa.scan(automaton, text):
+                #print(token, repr(match))
+                print(match)
+        except dfa.NoMatchError:
+            print('NOPE')
+
+        log('\t%.5f Matched', elapsed)
+
+    elif action == 'lex':
+        s = sys.stdin.read()
+
+        # Take a file?
+        # Or we can just have a list of (name, action)
+        print('TODO')
+
+    else:
+        raise RuntimeError('Invalid action %r' % action)
 
     if 0:
         pid = os.getpid()

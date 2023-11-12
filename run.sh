@@ -138,35 +138,44 @@ tool() {
   python3 -m refactor.tool "$@"
 }
 
-test-tool() {
+test-tool-match() {
   #set -x
-  tool 'a+' a
-  tool 'a+' b
+  tool match 'a+' a
+  tool match 'a+' b
 
-  tool 'a' a
+  tool match 'a' a
 
   # Bad syntax
-  tool ')' a
+  tool match ')' a
 
   # BUG in Epsilon parser: Doesn't accept [^"\]
   local fav='"([^\"]|\\.)*"'
 
-  tool "$fav" '"hi"'
-  tool "$fav" '"hi\n \\ "'
-  tool "$fav" '"hi\n \"'
-  tool "$fav" 'hi"'
+  tool match "$fav" '"hi"'
+  tool match "$fav" '"hi\n \\ "'
+  tool match "$fav" '"hi\n \"'
+  tool match "$fav" 'hi"'
 
   return
   tool '+' a
-
 }
+
+test-tool-lex() {
+  cat README.md | tool lex
+}
+
+test-tool() {
+  test-tool-match
+  test-tool-lex
+}
+
 
 nfa-suite() {
   #../../oilshell/rsc-regexp/test $0 tool
   #bash -x ../../oilshell/rsc-regexp/test $0 tool
 
   # from BurntSushi/rsc-regexp
-  ./nfa-suite.sh $0 tool
+  ./nfa-suite.sh $0 tool match
 }
 
 #
