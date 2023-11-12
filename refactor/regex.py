@@ -46,11 +46,6 @@ class Expression:
     def NullValue(self):
         return NULL
 
-    def nullable(self):
-        nu = self.nu()
-        assert nu == EPSILON or nu == NULL
-        return nu == EPSILON
-
 
 class SymbolSet(Expression):
 

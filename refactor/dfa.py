@@ -35,13 +35,6 @@ class ExpressionVector(tuple):
     def NullValue(self):
         return self.__class__((name, regex.NULL) for name, expr in self)
 
-    def nullable(self):
-        return [name for name, expr in self if expr.nullable()]
-
-    def derivative(self, symbol):
-        return ExpressionVector(
-            (name, expr.derivative(symbol)) for name, expr in self)
-
 
 def product_intersections(*sets):
     """Return the intersections of the cartesian product of sequences of sets.
@@ -75,7 +68,7 @@ def DerivClasses(state):
         return DerivClasses(state._expr)
 
     elif isinstance(state, regex.Concatenation):
-        if state._left.nullable():
+        if Nullable(state._left):
             return filter(
                 None,
                 product_intersections(DerivClasses(state._left),
@@ -121,19 +114,29 @@ def Derivative(state, symbol):
     elif isinstance(state, regex.Concatenation):
         return regex.LogicalOr(
             regex.Concatenation(Derivative(state._left, symbol), state._right),
-            regex.Concatenation(state._left.nu(),
-                                Derivative(state._right, symbol)))
+            regex.Concatenation(state._left.nu(), Derivative(state._right, symbol)))
 
     elif isinstance(state, regex.LogicalOr):
-        return regex.LogicalOr(Derivative(state._left, symbol),
-                               Derivative(state._right, symbol))
+        return regex.LogicalOr(
+                Derivative(state._left, symbol),
+                Derivative(state._right, symbol))
 
     elif isinstance(state, regex.LogicalAnd):
-        return regex.LogicalAnd(Derivative(state._left, symbol),
-                                Derivative(state._right, symbol))
+        return regex.LogicalAnd(
+                Derivative(state._left, symbol),
+                Derivative(state._right, symbol))
 
     else:
         raise AssertionError(state)
+
+
+def Nullable(state):
+    if isinstance(state, ExpressionVector):
+        return [name for name, expr in state if Nullable(expr)]
+    else:
+        nu = state.nu()
+        assert nu == regex.EPSILON or nu == regex.NULL
+        return nu == regex.EPSILON
 
 
 def construct(expr):
@@ -178,7 +181,7 @@ def construct(expr):
 
         transitions[number].sort()
 
-    accepts = [state.nullable() for state in states]
+    accepts = [Nullable(state) for state in states]
     error = states[expr.NullValue()]
     return Automaton(transitions, accepts, error)
 
