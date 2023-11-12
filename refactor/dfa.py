@@ -225,18 +225,21 @@ class NoMatchError(Exception):
         super().__init__(msg)
 
 
-def scan(automaton, iterable):
-    buffer, offset = [], 0
-    state, accept, length = 0, False, 0
-    atoms = iterable
+def scan(automaton, atoms):
+    buffer = []
+    offset = 0
+
+    state = 0
+    accept = None  # TODO: Is this a state?
+    accept_pos = 0
 
     start_time = time.time()
 
-    i = 0
+    j = 0
     while True:
         if automaton.accepts[state]:
             accept = automaton.accepts[state]
-            length = offset
+            accept_pos = offset
 
         if offset < len(buffer):
             atom = buffer[offset]
@@ -244,6 +247,8 @@ def scan(automaton, iterable):
             atom = next(atoms, None)
             if atom is not None:
                 buffer.append(atom)
+
+        #log('\t%d. offset %d   atom %r  buffer %r', j, offset, atom, buffer)
 
         if atom is not None:
             symbol = ord(atom)
@@ -264,15 +269,23 @@ def scan(automaton, iterable):
 
         if state == automaton.error:
             if accept:
-                yield accept[0], ''.join(buffer[:length])
-                buffer, offset = buffer[length:], 0
-                state, accept, length = 0, False, 0
-            elif buffer:
+                yield accept[0], ''.join(buffer[:accept_pos])
+
+                buffer = buffer[accept_pos:]
+                # It's NOT empty after truncation!
+                # log('\tbuf %r', buffer)
+
+                offset = 0
+                state = 0
+                accept = None
+
+            elif buffer:  # unmatched in buffer
                 raise NoMatchError(buffer)
+
             else:
                 break
-        i += 1
-        if i % 100 == 0:
+        j += 1
+        if j % 100 == 0:
             #elapsed = time.time() - start_time
             #util.log('%d iterations in %.5f seconds', 100, elapsed)
             pass

@@ -161,11 +161,15 @@ test-tool-match() {
 }
 
 test-tool-lex() {
-  echo '"hi" "escaped\n"' | tool lex examples/string.epsilon
+  echo 
+  echo LEX
+  echo
+  echo '"hi"  "escaped\n"' | tool lex examples/string.epsilon
 }
 
 test-tool() {
   test-tool-match
+
   test-tool-lex
 }
 
