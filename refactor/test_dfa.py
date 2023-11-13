@@ -1,6 +1,7 @@
 import itertools
 import random
 import unittest
+import string
 import time
 from . import dfa
 from . import parse
@@ -28,6 +29,28 @@ class TestDfa(unittest.TestCase):
         text = iter('99 hello "there" 42 foo99')
         for token, match in dfa.scan(automaton, text):
             print(token, repr(match))
+
+    def testManyAlternates(self):
+        parser = parse.Parser()
+
+        parser = parse.Parser()
+        print(dir(string))
+
+
+        lexer = []
+        for c in string.ascii_letters:
+            lexer.append((c, c * 10))
+        print(lexer)
+
+        # This blows up too!  So it's not just concatenation, but also
+        # alternation.
+        n = 5
+        lexer = lexer[:n]
+
+        vector = regex.RegularVector([(name, parser.parse(pat))
+                                      for name, pat in lexer])
+        print(vector)
+        automaton = dfa.construct(vector)
 
     def testBacktracking(self):
         n = 40

@@ -36,6 +36,24 @@ cli.py has this parser:
 
   - I kinda want to be Expression with values
 
+## Questions
+
+- Can we accept that `a?a?a? ... aaa ...` blows up at compile time?
+  - Because that regex has a high amount of "non-determinism"
+- But maybe most **common** regexes don't have this?
+  - So derivatives are good for a lexer generator, but not user-defined regexes?
+  - That's my current theory, based on some hacking, but I haven't seen this claim in practice.
+
+- ANSWER: A lexer with MANY expressions also blows up.  It's not just LONG ones.
+  - I think this is inherent in the "regex with derivatives" algorithm.
+  - Did the original paper not mention this?
+
+So then I think it would be IMPRACTICAL to export the whole Oils lexer to this
+tiny algorithm.
+
+I guess this was obvious from the start, but I thought some of the
+canonicalization or maybe hash-consing would do some magic.
+
 ### Testing
 
 - Testing:
