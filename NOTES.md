@@ -21,11 +21,20 @@ cli.py has this parser:
                     (token, parser.parse(section[token].replace("\n", "")))
                     for token in tokens)
 
-## TODO
+## Backtracking
 
 - Figure out why a?a?a?aaa is blowing up
   - is the existing canonicalization OK, or do we need a new approach?
   - it's based on tuples.  Maybe write some unit tests
+
+Commands:
+
+    ./run.sh fgrep-problem-blowup              # aaa|bbb|ccc|...
+
+    ./backtrack.sh compare-synthetic-rsc-all   # a?a? ... aaa ...
+
+## TODO
+
 
 - Add static typing
   - ExpressionVector might become separate

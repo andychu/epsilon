@@ -97,8 +97,12 @@ unit-tests() {
   # TestIntegerSet.test_prod
 }
 
-perf-bug() {
-  python3 -m refactor.test_dfa TestDfa.testBacktracking
+fgrep-problem-blowup() {
+  #python3 -m refactor.test_dfa TestDfa.testBacktracking
+
+  python3 -m refactor.test_dfa TestDfa.testManyAlternates 9
+  python3 -m refactor.test_dfa TestDfa.testManyAlternates 10
+  python3 -m refactor.test_dfa TestDfa.testManyAlternates 11
 }
 
 execute() {

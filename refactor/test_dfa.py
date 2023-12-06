@@ -2,6 +2,7 @@ import itertools
 import random
 import unittest
 import string
+import sys
 import time
 from . import dfa
 from . import parse
@@ -30,26 +31,27 @@ class TestDfa(unittest.TestCase):
         for token, match in dfa.scan(automaton, text):
             print(token, repr(match))
 
+    # Set before main()
+    NUM_ALTS = 5
+
     def testManyAlternates(self):
         parser = parse.Parser()
-
-        parser = parse.Parser()
-        print(dir(string))
-
+        #print(dir(string))
 
         lexer = []
         for c in string.ascii_letters:
             lexer.append((c, c * 10))
-        print(lexer)
+        #print(lexer)
+
+        log('N = %d', self.NUM_ALTS)
 
         # This blows up too!  So it's not just concatenation, but also
         # alternation.
-        n = 5
-        lexer = lexer[:n]
+        lexer = lexer[:self.NUM_ALTS]
 
         vector = regex.RegularVector([(name, parser.parse(pat))
                                       for name, pat in lexer])
-        print(vector)
+        #print(vector)
         automaton = dfa.construct(vector)
 
     def testBacktracking(self):
@@ -70,8 +72,10 @@ class TestDfa(unittest.TestCase):
         parser = parse.Parser()
 
         expr = parser.parse(pat)
-        log('EXPR %s', expr)
-        log('')
+
+        if 0:
+            log('EXPR %s', expr)
+            log('')
 
         vector = regex.RegularVector([('main', expr)])
         #print(vector)
@@ -84,8 +88,9 @@ class TestDfa(unittest.TestCase):
         # This also blows up
         d = dfa.Derivative(expr, ord('a'))
 
-        log('DERIV %s', d)
-        log('')
+        if 0:
+            log('DERIV %s', d)
+            log('')
 
         elapsed = time.time() - start_time
         log('n = %d, elapsed %.3f ms', n, elapsed * 1000)
@@ -105,4 +110,7 @@ class TestDfa(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        TestDfa.NUM_ALTS = int(sys.argv.pop())
+
     unittest.main()
