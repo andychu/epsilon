@@ -98,9 +98,13 @@ syn-pattern() {
   echo
 }
 
-compare-syn-1() {
+compare-synthetic-rsc() {
   local impl=${1:-epsilon}
   local n=${2:-25}
+
+  echo
+  echo "=== synthetic-rsc, n = $n"
+  echo
 
   local pat
   pat=$(syn-pattern $n)
@@ -109,6 +113,13 @@ compare-syn-1() {
   text=$(repeat a $n)
 
   compare $impl "$pat" "$text"
+}
+
+compare-synthetic-rsc-all() {
+  compare-synthetic-rsc '' 10
+  compare-synthetic-rsc '' 20
+  compare-synthetic-rsc '' 30
+
 }
 
 compare-syn-2() {
