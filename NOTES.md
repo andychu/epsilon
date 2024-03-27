@@ -21,20 +21,83 @@ cli.py has this parser:
                     (token, parser.parse(section[token].replace("\n", "")))
                     for token in tokens)
 
-## Backtracking
-
-- Figure out why a?a?a?aaa is blowing up
-  - is the existing canonicalization OK, or do we need a new approach?
-  - it's based on tuples.  Maybe write some unit tests
+## Testing
 
 Commands:
 
-    ./run.sh fgrep-problem-blowup              # aaa|bbb|ccc|...
+- `./run.sh test-tool`
+  - Runs `python3 -m refactor.tool match a+ a`, for example
+  - This is a demo without assertions
+- `./run.sh nfa-suite`
+  - This is from the BurntSushi test suite, an unrelated "Dragon Book"
+    implementation
+  - the only failures are due to bad regex syntax, which is OK
 
-    ./backtrack.sh compare-synthetic-rsc-all   # a?a? ... aaa ...
+## Backtracking Bug
+
+Why is `a?a?a?aaa` is blowing up?
+
+- Is the existing canonicalization OK, or do we need a new approach?
+- It's based on tuples.  Write some unit tests
+
+Commands:
+
+- `./backtrack.sh compare-synthetic-rsc '' 20`
+  - run one instance of this problem
+- `./backtrack.sh compare-synthetic-rsc-all   # a?a? ... aaa ...`
+  - run 3 instances with different N
+- `./run.sh fgrep-problem-blowup  # aaa|bbb|ccc|...`
+  - Runs unit tests showing the blowup
+
+### Output
+
+```
+~/git/oilshell/epsilon (master)$ ./backtrack.sh compare-synthetic-rsc-all
+
+=== synthetic-rsc, n = 15
+
+   IMPL = epsilon   pat = a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaa
+
+text aaaaaaaaaaaaaaa
+        0.00067 Parsed
+        0.19026 DFA
+aaaaaaaaaaaaaaa
+        0.19026 Matched
+
+real    0m0.227s
+user    0m0.218s
+sys     0m0.008s
+
+=== synthetic-rsc, n = 20
+
+   IMPL = epsilon   pat = a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaaaaaaa
+
+text aaaaaaaaaaaaaaaaaaaa
+        0.00108 Parsed
+        0.68500 DFA
+aaaaaaaaaaaaaaaaaaaa
+        0.68500 Matched
+
+real    0m0.711s
+user    0m0.711s
+sys     0m0.000s
+
+=== synthetic-rsc, n = 25
+
+   IMPL = epsilon   pat = a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaaaaaaaaaaaa
+
+text aaaaaaaaaaaaaaaaaaaaaaaaa
+        0.00153 Parsed
+        2.08398 DFA
+aaaaaaaaaaaaaaaaaaaaaaaaa
+        2.08398 Matched
+
+real    0m2.110s
+user    0m2.102s
+sys     0m0.008s
+```
 
 ## TODO
-
 
 - Add static typing
   - ExpressionVector might become separate
@@ -62,13 +125,6 @@ tiny algorithm.
 
 I guess this was obvious from the start, but I thought some of the
 canonicalization or maybe hash-consing would do some magic.
-
-### Testing
-
-- Testing:
-  - ./run.sh nfa-suite
-  - ./run.sh test-tool -- well there are no assertions here
-  - ./backtrack.sh compare-syn-1 '' 20  -- bug to fix
 
 ### rsc-regexp
 
@@ -108,9 +164,7 @@ Markdown/blog:
 
 ### Flow
 
-
 - parse()
 - dfa.construct()
 - dfa.scan()
-
 - Hm this algorithm is tiny

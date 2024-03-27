@@ -116,9 +116,9 @@ compare-synthetic-rsc() {
 }
 
 compare-synthetic-rsc-all() {
-  compare-synthetic-rsc '' 17
-  compare-synthetic-rsc '' 18
-  compare-synthetic-rsc '' 19
+  compare-synthetic-rsc '' 15
+  compare-synthetic-rsc '' 20
+  compare-synthetic-rsc '' 25
 }
 
 compare-syn-2() {
