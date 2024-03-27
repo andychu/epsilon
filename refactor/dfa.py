@@ -171,7 +171,7 @@ def Nullable(state: regex.Expression):
         return nu == regex.EPSILON
 
 
-def Nu(state: regex.Expression):
+def Nu2(state: regex.Expression):
     if isinstance(state, regex.Epsilon):
         return state
 
@@ -197,6 +197,39 @@ def Nu(state: regex.Expression):
 
     else:
         raise AssertionError(state)
+
+
+def Nu(state: regex.Expression):
+    if isinstance(state, regex.Epsilon):
+        return state
+
+    if hasattr(state, "nu"):
+        return state.nu
+
+    if isinstance(state, regex.SymbolSet):
+        state.nu = regex.EMPTY_SET
+
+    elif isinstance(state, regex.Star):
+        state.nu = regex.EPSILON
+
+    elif isinstance(state, regex.Not):
+        nu = Nu(state._expr)
+        assert nu == regex.EPSILON or nu == regex.EMPTY_SET
+        state.nu = regex.EMPTY_SET if nu == regex.EPSILON else regex.EPSILON
+
+    elif isinstance(state, regex.Cat):
+        state.nu = regex.And(Nu(state._left), Nu(state._right))
+
+    elif isinstance(state, regex.Or):
+        state.nu = regex.Or(Nu(state._left), Nu(state._right))
+
+    elif isinstance(state, regex.And):
+        state.nu = regex.And(Nu(state._left), Nu(state._right))
+
+    else:
+        raise AssertionError(state)
+
+    return state.nu
 
 
 def construct(expr: Any) -> Automaton:

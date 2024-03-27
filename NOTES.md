@@ -97,6 +97,54 @@ user    0m2.102s
 sys     0m0.008s
 ```
 
+### Output with Patch (doesn't seem different)
+
+```
+~/git/oilshell/epsilon$ ./backtrack.sh compare-synthetic-rsc-all
+
+=== synthetic-rsc, n = 15
+
+   IMPL = epsilon   pat = a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaa
+
+text aaaaaaaaaaaaaaa
+        0.00065 Parsed
+        0.16824 DFA
+aaaaaaaaaaaaaaa
+        0.16824 Matched
+
+real    0m0.199s
+user    0m0.187s
+sys     0m0.012s
+
+=== synthetic-rsc, n = 20
+
+   IMPL = epsilon   pat = a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaaaaaaa
+
+text aaaaaaaaaaaaaaaaaaaa
+        0.00111 Parsed
+        0.65838 DFA
+aaaaaaaaaaaaaaaaaaaa
+        0.65838 Matched
+
+real    0m0.684s
+user    0m0.680s
+sys     0m0.004s
+
+=== synthetic-rsc, n = 25
+
+   IMPL = epsilon   pat = a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?a?aaaaaaaaaaaaaaaaaaaaaaaaa
+
+text aaaaaaaaaaaaaaaaaaaaaaaaa
+        0.00165 Parsed
+        2.07165 DFA
+aaaaaaaaaaaaaaaaaaaaaaaaa
+        2.07165 Matched
+
+real    0m2.098s
+user    0m2.097s
+sys     0m0.000s
+```
+
 ## TODO
 
 - Add static typing
